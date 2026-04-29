@@ -1,0 +1,10 @@
+services:
+  delivery-app:
+    build: .
+    container_name: delivery_v1
+    restart: always
+    ports:
+      - "3001:80"
+
+
+
