@@ -297,7 +297,7 @@ export default function Index() {
 
             <div className="relative">
               <img
-                src="/vip-delivery-logo.png"
+                src="/vip-delivery-logo-hero.png"
                 alt="VIP Delivery"
                 className="block h-auto w-full object-contain drop-shadow-2xl"
               />
