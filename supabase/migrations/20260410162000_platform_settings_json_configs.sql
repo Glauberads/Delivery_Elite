@@ -29,7 +29,7 @@ SET value = jsonb_build_object(
     'secure', COALESCE((SELECT value FROM public.platform_settings WHERE key = 'smtp_secure'), 'false'),
     'username', COALESCE((SELECT value FROM public.platform_settings WHERE key = 'smtp_username'), ''),
     'password', COALESCE((SELECT value FROM public.platform_settings WHERE key = 'smtp_password'), ''),
-    'fromName', COALESCE((SELECT value FROM public.platform_settings WHERE key = 'smtp_from_name'), 'Delivery MAX')
+    'fromName', COALESCE((SELECT value FROM public.platform_settings WHERE key = 'smtp_from_name'), 'VIP Delivery')
 )::text
 WHERE key = 'smtp_config'
   AND (value IS NULL OR value = '');

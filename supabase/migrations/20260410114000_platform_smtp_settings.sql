@@ -6,7 +6,7 @@ VALUES
     ('smtp_username', NULL, 'Usuário de autenticação SMTP', false),
     ('smtp_password', NULL, 'Senha de autenticação SMTP', true),
     ('smtp_from_email', NULL, 'E-mail remetente padrão usado nos envios SMTP', false),
-    ('smtp_from_name', 'Delivery MAX', 'Nome exibido como remetente dos e-mails SMTP', false)
+    ('smtp_from_name', 'VIP Delivery', 'Nome exibido como remetente dos e-mails SMTP', false)
 ON CONFLICT (key) DO UPDATE
 SET
     description = EXCLUDED.description,

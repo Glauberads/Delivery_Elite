@@ -1,5 +1,5 @@
 -- =====================================================
--- Delivery MAX — SaaS Multi-Tenant Schema v2.0
+-- VIP Delivery — SaaS Multi-Tenant Schema v2.0
 -- =====================================================
 -- Segurança: Isolamento 100% por RLS + tenant_id
 -- Auth: Supabase Auth nativo (JWT, bcrypt, refresh token)
@@ -808,7 +808,7 @@ INSERT INTO public.platform_settings (key, value, description, is_secret) VALUES
     ('split_partner_b_percent', '35',        'Percentual do Sócio B',                    false),
     ('split_main_percent',      '30',        'Percentual conta principal (Fundo de Caixa)', false),
     ('trial_days',              '7',         'Dias de trial para novos restaurantes',    false),
-    ('system_name',             'Delivery MAX', 'Nome do sistema',                       false),
+    ('system_name',             'VIP Delivery', 'Nome do sistema',                       false),
     ('support_whatsapp',        NULL,        'WhatsApp de suporte',                      false);
 
 -- =====================================================
@@ -886,7 +886,7 @@ VALUES (
 -- =====================================================
 
 COMMENT ON TABLE public.tenants IS 'Cada restaurante cadastrado é um tenant isolado';
-COMMENT ON TABLE public.superadmin_users IS 'Administradores da plataforma Delivery MAX';
+COMMENT ON TABLE public.superadmin_users IS 'Administradores da plataforma VIP Delivery';
 COMMENT ON TABLE public.platform_settings IS 'Configurações globais da plataforma (Asaas, split, etc)';
 COMMENT ON TABLE public.plans IS 'Planos de assinatura disponíveis';
 COMMENT ON FUNCTION public.get_my_tenant_id() IS 'Retorna o tenant_id do usuário autenticado — usada pelo RLS';

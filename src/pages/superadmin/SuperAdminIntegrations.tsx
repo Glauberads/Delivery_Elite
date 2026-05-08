@@ -50,7 +50,7 @@ const defaultForm: SettingsForm = {
   split_partner_a_percent: "",
   split_partner_b_wallet: "",
   split_partner_b_percent: "",
-  smtp_sender_name: "Delivery MAX",
+  smtp_sender_name: "VIP Delivery",
   resend_api_key: "",
   resend_from_email: "",
 };
@@ -210,7 +210,7 @@ export default function SuperAdminIntegrations() {
         },
         {
           key: "smtp_sender_name",
-          value: form.smtp_sender_name || "Delivery MAX",
+          value: form.smtp_sender_name || "VIP Delivery",
         },
         {
           key: "resend_from_email",

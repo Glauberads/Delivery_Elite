@@ -1,5 +1,5 @@
 -- =====================================================
--- Delivery Max - CONSOLIDATED MIGRATION
+-- VIP Delivery - CONSOLIDATED MIGRATION
 -- =====================================================
 -- This file consolidates all migrations into a single file
 -- Compatible with Supabase client and types

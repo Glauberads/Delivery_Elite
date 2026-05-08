@@ -1,8 +1,8 @@
-# 🍕 Delivery Max
+# 🍕 VIP Delivery
 
 > Sistema completo de gestão de pedidos e entregas para restaurantes e estabelecimentos alimentícios
 
-![Delivery Max](https://img.shields.io/badge/Status-Produção-brightgreen)
+![VIP Delivery](https://img.shields.io/badge/Status-Produção-brightgreen)
 ![React](https://img.shields.io/badge/React-18.3.1-blue)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.5.3-blue)
 ![Supabase](https://img.shields.io/badge/Supabase-Backend-green)
@@ -10,7 +10,7 @@
 
 ## 📋 Sobre o Projeto
 
-O **Delivery Max** é uma solução completa e moderna para gestão de pedidos, entregas e operações de restaurantes. Desenvolvido com foco em performance, escalabilidade e experiência do usuário, oferece todas as ferramentas necessárias para gerenciar um negócio de alimentação de forma eficiente.
+O **VIP Delivery** é uma solução completa e moderna para gestão de pedidos, entregas e operações de restaurantes. Desenvolvido com foco em performance, escalabilidade e experiência do usuário, oferece todas as ferramentas necessárias para gerenciar um negócio de alimentação de forma eficiente.
 
 ### ✨ Principais Funcionalidades
 
@@ -63,7 +63,7 @@ O **Delivery Max** é uma solução completa e moderna para gestão de pedidos, 
 
 ```bash
 git clone <url-do-repositorio>
-cd "Delivery Max"
+cd "VIP Delivery"
 ```
 
 ### 2. Instale as dependências

@@ -121,9 +121,9 @@ export function MobileNav() {
           to="/dashboard" 
           className="flex items-center gap-2 group transition-all duration-300 hover:scale-105"
         >
-          <img src="/icon.svg" alt="Delivery MAX" className="h-8 w-8 object-contain shadow-lg transition-all duration-300 group-hover:scale-105" />
+          <img src="/icon.svg" alt="VIP Delivery" className="h-8 w-8 object-contain shadow-lg transition-all duration-300 group-hover:scale-105" />
           <span className="font-heading font-bold text-lg bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent transition-all duration-300 group-hover:from-delivery-500 group-hover:to-delivery-600">
-            Delivery MAX
+            VIP Delivery
           </span>
         </Link>
       </div>
@@ -139,9 +139,9 @@ export function MobileNav() {
               className="flex items-center gap-2 group transition-all duration-300 hover:scale-105"
               onClick={() => setOpen(false)}
             >
-              <img src="/icon.svg" alt="Delivery MAX" className="h-8 w-8 object-contain shadow-lg transition-all duration-300 group-hover:scale-105" />
+              <img src="/icon.svg" alt="VIP Delivery" className="h-8 w-8 object-contain shadow-lg transition-all duration-300 group-hover:scale-105" />
               <span className="font-heading font-bold text-lg bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent transition-all duration-300 group-hover:from-delivery-500 group-hover:to-delivery-600">
-                Delivery MAX
+                VIP Delivery
               </span>
             </Link>
           </div>

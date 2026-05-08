@@ -27,6 +27,7 @@ import { Sheet, SheetClose, SheetContent, SheetTrigger } from "@/components/ui/s
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
 import { cn } from "@/lib/utils";
+import heroImage from "@/assets/hero-1.webp";
 
 const featureCards = [
   {
@@ -176,9 +177,9 @@ export default function Index() {
       <header className="sticky top-0 z-50 border-b border-border/60 bg-background/80 backdrop-blur-xl">
         <div className={cn(landingContainerClass, "flex h-16 items-center justify-between gap-2 md:gap-4")}>
           <Link to="/" className="flex min-w-0 flex-1 items-center gap-3 md:flex-none">
-            <img src="/icon.svg" alt="Delivery MAX" className="h-10 w-10 rounded-xl object-contain shadow-sm" />
+            <img src="/icon.svg" alt="VIP Delivery" className="h-10 w-10 rounded-xl object-contain shadow-sm" />
             <div className="flex min-w-0 flex-col">
-              <span className="truncate font-heading text-lg font-bold tracking-tight sm:text-xl">Delivery MAX</span>
+              <span className="truncate font-heading text-lg font-bold tracking-tight sm:text-xl">VIP Delivery</span>
             </div>
           </Link>
 
@@ -208,9 +209,9 @@ export default function Index() {
               </SheetTrigger>
               <SheetContent side="right" className="w-[85vw] max-w-none border-border/60 bg-background/95 p-6 sm:max-w-sm">
                 <div className="flex items-center gap-3 border-b border-border/60 pb-5 pr-10">
-                  <img src="/icon.svg" alt="Delivery MAX" className="h-10 w-10 rounded-xl object-contain shadow-sm" />
+                  <img src="/icon.svg" alt="VIP Delivery" className="h-10 w-10 rounded-xl object-contain shadow-sm" />
                   <div className="flex flex-col">
-                    <span className="font-heading text-lg font-bold tracking-tight">Delivery MAX</span>
+                    <span className="font-heading text-lg font-bold tracking-tight">VIP Delivery</span>
                     <span className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground">SaaS para restaurantes</span>
                   </div>
                 </div>
@@ -303,8 +304,8 @@ export default function Index() {
 
             <div className="relative">
               <img
-                src="/landing/hero-1.webp"
-                alt="Preview do painel Delivery MAX"
+                src={heroImage}
+                alt="Preview do painel VIP Delivery"
                 className="block h-auto w-full object-contain"
               />
 
@@ -375,7 +376,7 @@ export default function Index() {
                   <h3 className="text-2xl font-semibold">{feature.title}</h3>
                   <p className="mt-4 text-sm leading-7 text-muted-foreground">{feature.description}</p>
                   <div className="mt-auto pt-8 text-xs font-semibold uppercase tracking-[0.22em] text-primary">
-                    Delivery MAX
+                    VIP Delivery
                   </div>
                 </CardContent>
               </Card>
@@ -387,7 +388,7 @@ export default function Index() {
               <p className="text-sm font-semibold uppercase tracking-[0.22em] text-primary">Performance operacional</p>
               <h3 className="mt-4 text-3xl font-bold tracking-tight">Mais margem, menos ruído e controle real da loja</h3>
               <p className="mt-4 text-base leading-8 text-muted-foreground">
-                O Delivery MAX foi desenhado para centralizar cardápio, atendimento, pagamentos, painel administrativo e gestão do negócio.
+                O VIP Delivery foi desenhado para centralizar cardápio, atendimento, pagamentos, painel administrativo e gestão do negócio.
               </p>
             </div>
 
@@ -562,7 +563,7 @@ export default function Index() {
                 <p className="text-sm font-semibold uppercase tracking-[0.22em] text-primary">Pronto para vender mais?</p>
                 <h2 className="mt-4 text-4xl font-bold tracking-tight">Coloque seu delivery online com operação profissional</h2>
                 <p className="mt-4 max-w-2xl text-lg leading-8 text-muted-foreground">
-                  Teste o Delivery MAX e coloque cardápio, pedidos, checkout e painel no mesmo fluxo.
+                  Teste o VIP Delivery e coloque cardápio, pedidos, checkout e painel no mesmo fluxo.
                 </p>
               </div>
 
@@ -582,9 +583,9 @@ export default function Index() {
       <footer className="border-t border-border/60 bg-card/40 py-10">
         <div className="container flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
           <div className="flex items-center gap-3">
-            <img src="/icon.svg" alt="Delivery MAX" className="h-9 w-9 rounded-lg object-contain" />
+            <img src="/icon.svg" alt="VIP Delivery" className="h-9 w-9 rounded-lg object-contain" />
             <div>
-              <p className="font-heading text-lg font-bold">Delivery MAX</p>
+              <p className="font-heading text-lg font-bold">VIP Delivery</p>
               <p className="text-sm text-muted-foreground">Sistema premium para operação de restaurantes</p>
             </div>
           </div>

@@ -536,7 +536,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       toast({
         title: "Login realizado com sucesso",
-        description: `Bem-vindo ao Delivery MAX, ${profile.firstName || profile.email}!`,
+        description: `Bem-vindo ao VIP Delivery, ${profile.firstName || profile.email}!`,
       });
 
       // Redirecionar baseado no role

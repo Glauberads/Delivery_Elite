@@ -127,10 +127,10 @@ export default function Login() {
           <div className="flex items-center justify-center gap-3 mx-auto mb-4">
             <img
               src="/icon.svg"
-              alt="Delivery MAX"
+              alt="VIP Delivery"
               className="h-10 w-10 object-contain shadow-lg transition-all duration-300 group-hover:scale-105 sm:h-12 sm:w-12"
             />
-            <h1 className="text-[1.5rem] font-bold sm:text-3xl">Delivery MAX</h1>
+            <h1 className="text-[1.5rem] font-bold sm:text-3xl">VIP Delivery</h1>
           </div>
         </div>
 

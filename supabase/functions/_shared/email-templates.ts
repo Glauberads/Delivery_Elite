@@ -60,7 +60,7 @@ function renderEmailFrame({
     <div style="margin:0;padding:32px;background:${EMAIL_OUTER_BG};font-family:Inter,Segoe UI,Arial,sans-serif;color:${EMAIL_TEXT};">
       <div style="max-width:640px;margin:0 auto;border-radius:32px;overflow:hidden;background:${EMAIL_BG};box-shadow:0 28px 64px rgba(15,23,42,0.30);border:1px solid ${EMAIL_BORDER};">
         <div style="padding:36px 32px 18px;background:${EMAIL_BG};text-align:center;">
-          <img src="${EMAIL_LOGO_URL}" alt="Delivery MAX" style="display:block;width:100%;max-width:160px;height:auto;margin:0 auto 22px;" />
+          <img src="${EMAIL_LOGO_URL}" alt="VIP Delivery" style="display:block;width:100%;max-width:160px;height:auto;margin:0 auto 22px;" />
           <div style="display:inline-block;padding:8px 14px;border-radius:999px;background:${badgeColor};color:#ffffff;font-size:11px;font-weight:800;letter-spacing:0.18em;text-transform:uppercase;">
             ${escapeHtml(eyebrow)}
           </div>
@@ -77,7 +77,7 @@ function renderEmailFrame({
             ${ctaBlock}
           </div>
           <p style="margin:18px 0 0;color:${EMAIL_SUBTLE};font-size:12px;line-height:1.6;text-align:center;">
-            ${escapeHtml(footerText ?? "Delivery MAX · comunicação automatizada da sua operação SaaS.")}
+            ${escapeHtml(footerText ?? "VIP Delivery · comunicação automatizada da sua operação SaaS.")}
           </p>
         </div>
       </div>
@@ -99,12 +99,12 @@ export function buildSignupWelcomeEmail(input: {
   storeName: string;
   confirmationUrl: string;
 }): BuiltEmailTemplate {
-  const subject = "Bem-vindo ao Delivery MAX";
+  const subject = "Bem-vindo ao VIP Delivery";
   return {
     subject,
     html: renderEmailFrame({
       eyebrow: "Boas-vindas",
-      title: "Confirme seu acesso ao Delivery MAX",
+      title: "Confirme seu acesso ao VIP Delivery",
       subtitle: "Seu painel premium já está provisionado. Falta apenas validar o e-mail para liberar o primeiro acesso.",
       accentColor: "#ef4444",
       badgeColor: "#475569",
@@ -112,7 +112,7 @@ export function buildSignupWelcomeEmail(input: {
       ctaUrl: input.confirmationUrl,
       bodyHtml: `
         <p style="margin:0 0 16px;">Olá, <strong>${escapeHtml(input.fullName)}</strong>.</p>
-        <p style="margin:0 0 16px;">A loja <strong>${escapeHtml(input.storeName)}</strong> foi criada com sucesso no Delivery MAX.</p>
+        <p style="margin:0 0 16px;">A loja <strong>${escapeHtml(input.storeName)}</strong> foi criada com sucesso no VIP Delivery.</p>
         <p style="margin:0;">Clique no botão abaixo para confirmar seu e-mail com segurança via Supabase Auth. Somente após esse clique sua conta será validada no login.</p>
       `,
     }),
@@ -120,11 +120,11 @@ export function buildSignupWelcomeEmail(input: {
       ${subject}
 
       Olá, ${input.fullName}.
-      A loja ${input.storeName} foi criada com sucesso no Delivery MAX.
+      A loja ${input.storeName} foi criada com sucesso no VIP Delivery.
       Confirme seu e-mail para liberar o primeiro acesso:
       ${input.confirmationUrl}
 
-      Delivery MAX
+      VIP Delivery
     `),
   };
 }
@@ -133,13 +133,13 @@ export function buildPasswordRecoveryEmail(input: {
   storeName: string;
   recoveryUrl: string;
 }): BuiltEmailTemplate {
-  const subject = "Recupere sua senha no Delivery MAX";
+  const subject = "Recupere sua senha no VIP Delivery";
   return {
     subject,
     html: renderEmailFrame({
       eyebrow: "Recuperação de acesso",
       title: "Defina uma nova senha com segurança",
-      subtitle: "Recebemos uma solicitação para redefinir a senha da sua conta no Delivery MAX.",
+      subtitle: "Recebemos uma solicitação para redefinir a senha da sua conta no VIP Delivery.",
       accentColor: "#ef4444",
       badgeColor: "#475569",
       ctaLabel: "Criar nova senha",
@@ -157,7 +157,7 @@ export function buildPasswordRecoveryEmail(input: {
       ${input.recoveryUrl}
 
       Se você não fez esse pedido, ignore este e-mail.
-      Delivery MAX
+      VIP Delivery
     `),
   };
 }
@@ -200,7 +200,7 @@ export function buildBillingLifecycleEmail(input: {
           Regularize a assinatura para evitar bloqueio do painel e do PDV:
           ${input.renewalUrl}
 
-          Delivery MAX
+          VIP Delivery
         `),
       };
     case "reminder_1d":
@@ -226,7 +226,7 @@ export function buildBillingLifecycleEmail(input: {
           Regularize agora para evitar interrupção de vendas, atendimento e operação do PDV:
           ${input.renewalUrl}
 
-          Delivery MAX
+          VIP Delivery
         `),
       };
     case "renewal_completed":
@@ -253,7 +253,7 @@ export function buildBillingLifecycleEmail(input: {
           Abra o painel:
           ${input.renewalUrl.replace("?billing=renew", "")}
 
-          Delivery MAX
+          VIP Delivery
         `),
       };
     case "access_suspended":
@@ -279,7 +279,7 @@ export function buildBillingLifecycleEmail(input: {
           Regularize agora para reativar painel, PDV e operação administrativa:
           ${input.renewalUrl}
 
-          Delivery MAX
+          VIP Delivery
         `),
       };
   }
