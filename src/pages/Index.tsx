@@ -177,7 +177,7 @@ export default function Index() {
       <header className="sticky top-0 z-50 border-b border-border/60 bg-background/80 backdrop-blur-xl">
         <div className={cn(landingContainerClass, "flex h-16 items-center justify-between gap-2 md:gap-4")}>
           <Link to="/" className="flex min-w-0 flex-1 items-center gap-3 md:flex-none">
-            <img src="/vip-delivery-logo.png" alt="VIP Delivery" className="h-12 w-auto object-contain" />
+            <img src="/vip-delivery-logo-hero.png" alt="VIP Delivery" className="h-12 w-auto object-contain" />
           </Link>
 
           <nav className="hidden items-center gap-6 md:flex">
@@ -206,7 +206,7 @@ export default function Index() {
               </SheetTrigger>
               <SheetContent side="right" className="w-[85vw] max-w-none border-border/60 bg-background/95 p-6 sm:max-w-sm">
                 <div className="flex items-center gap-3 border-b border-border/60 pb-5 pr-10">
-                  <img src="/vip-delivery-logo.png" alt="VIP Delivery" className="h-12 w-auto object-contain" />
+                  <img src="/vip-delivery-logo-hero.png" alt="VIP Delivery" className="h-12 w-auto object-contain" />
                 </div>
 
                 <div className="mt-6 space-y-2">
@@ -576,7 +576,7 @@ export default function Index() {
       <footer className="border-t border-border/60 bg-card/40 py-10">
         <div className="container flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
           <div className="flex items-center gap-3">
-            <img src="/vip-delivery-logo.png" alt="VIP Delivery" className="h-12 w-auto object-contain" />
+            <img src="/vip-delivery-logo-hero.png" alt="VIP Delivery" className="h-12 w-auto object-contain" />
           </div>
 
           <div className="flex flex-wrap gap-6 text-sm text-muted-foreground">
