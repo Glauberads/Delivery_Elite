@@ -30,6 +30,7 @@ export function jsonResponse(body: unknown, status = 200) {
 
 const ALLOWED_REDIRECT_ORIGINS = new Set([
   "https://delivery.overflex.cloud",
+  "https://vipdelivery.com.br",
   "http://localhost:5173",
   "http://127.0.0.1:5173",
   "http://localhost:8080",

@@ -62,6 +62,22 @@ function buildResendErrorBody(status: number, payload: unknown) {
 
 export async function loadResendConfig(supabaseAdmin: SupabaseClient) {
   const apiKey = await loadTextPlatformSetting(supabaseAdmin, "resend_api_key");
+  let senderEmail = DEFAULT_SENDER_EMAIL;
+  let senderName = DEFAULT_SENDER_NAME;
+
+  try {
+    const fromEmail = await loadTextPlatformSetting(supabaseAdmin, "resend_from_email");
+    if (fromEmail) senderEmail = fromEmail;
+  } catch {
+    // Ignore if not found
+  }
+
+  try {
+    const fromName = await loadTextPlatformSetting(supabaseAdmin, "smtp_sender_name");
+    if (fromName) senderName = fromName;
+  } catch {
+    // Ignore if not found
+  }
 
   if (!apiKey) {
     throw new HttpError(400, "Configuração Resend inválida: resend_api_key não informada.");
@@ -69,24 +85,15 @@ export async function loadResendConfig(supabaseAdmin: SupabaseClient) {
 
   return {
     apiKey,
-    senderEmail: DEFAULT_SENDER_EMAIL,
-    senderName: DEFAULT_SENDER_NAME,
+    senderEmail,
+    senderName,
   } satisfies PlatformResendConfig;
 }
 
 function formatResendFrom(senderName: string, senderEmail: string) {
   const normalizedSenderName = senderName.trim() || DEFAULT_SENDER_NAME;
   const normalizedSenderEmail = senderEmail.trim() || DEFAULT_SENDER_EMAIL;
-  const computedFrom = `${normalizedSenderName} <${normalizedSenderEmail}>`;
-
-  if (computedFrom !== FIXED_FROM) {
-    console.error("resend sender mismatch detected", {
-      expected: FIXED_FROM,
-      actual: computedFrom,
-    });
-  }
-
-  return FIXED_FROM.trim();
+  return `${normalizedSenderName} <${normalizedSenderEmail}>`;
 }
 
 export async function sendPlatformEmail(config: PlatformResendConfig, payload: PlatformEmailInput) {

@@ -259,8 +259,7 @@ BEGIN
 END;
 $$;
 
--- Grant execute to authenticated users
-GRANT EXECUTE ON FUNCTION public.get_product_full TO authenticated;
+GRANT EXECUTE ON FUNCTION public.get_product_full() TO authenticated;
 GRANT EXECUTE ON FUNCTION public.get_product_full(uuid) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.get_product_by_id(uuid) TO authenticated;
 

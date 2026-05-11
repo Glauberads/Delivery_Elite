@@ -16,6 +16,7 @@ import Home from "./pages/Home";
 import TrackOrder from "./pages/TrackOrder";
 import NotFound from "./pages/NotFound";
 import Index from "./pages/Index";
+import { AnalyticsInjector } from "./components/AnalyticsInjector";
 
 // Páginas de tenant (restaurante)
 import Dashboard from "./pages/Dashboard";
@@ -56,6 +57,7 @@ function App() {
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
           <BrowserRouter>
             <AuthProvider>
+              <AnalyticsInjector />
               <Routes>
               {/* ── Rotas Públicas ────────────────────────────── */}
               <Route path="/" element={<Index />} />

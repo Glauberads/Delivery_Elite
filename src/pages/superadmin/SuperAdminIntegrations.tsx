@@ -40,7 +40,7 @@ type AsaasHealthResponse = {
   error?: unknown;
 };
 
-const managedKeys = ["asaas_config", "resend_api_key", "resend_from_email", "smtp_sender_name"] as const;
+const managedKeys = ["asaas_config", "resend_api_key", "resend_from_email", "smtp_sender_name", "facebook_pixel_id", "google_tag_id"] as const;
 
 const defaultForm: SettingsForm = {
   asaas_environment: "sandbox",
@@ -53,6 +53,8 @@ const defaultForm: SettingsForm = {
   smtp_sender_name: "VIP Delivery",
   resend_api_key: "",
   resend_from_email: "",
+  facebook_pixel_id: "",
+  google_tag_id: "",
 };
 
 function isValidEmail(value: string) {
@@ -130,6 +132,8 @@ export default function SuperAdminIntegrations() {
     const resendApiKey = data?.find((item) => item.key === "resend_api_key")?.value;
     const resendFromEmail = data?.find((item) => item.key === "resend_from_email")?.value;
     const senderName = data?.find((item) => item.key === "smtp_sender_name")?.value;
+    const facebookPixelId = data?.find((item) => item.key === "facebook_pixel_id")?.value;
+    const googleTagId = data?.find((item) => item.key === "google_tag_id")?.value;
 
     nextForm.asaas_environment = String(asaasConfig.environment ?? defaultForm.asaas_environment);
     nextForm.asaas_api_key = String(asaasConfig.apiKey ?? "");
@@ -141,6 +145,8 @@ export default function SuperAdminIntegrations() {
     nextForm.smtp_sender_name = String(senderName ?? defaultForm.smtp_sender_name);
     nextForm.resend_api_key = String(resendApiKey ?? "");
     nextForm.resend_from_email = String(resendFromEmail ?? "");
+    nextForm.facebook_pixel_id = String(facebookPixelId ?? "");
+    nextForm.google_tag_id = String(googleTagId ?? "");
     setForm(nextForm);
   }, [data]);
 
@@ -215,6 +221,14 @@ export default function SuperAdminIntegrations() {
         {
           key: "resend_from_email",
           value: form.resend_from_email || "",
+        },
+        {
+          key: "facebook_pixel_id",
+          value: form.facebook_pixel_id || "",
+        },
+        {
+          key: "google_tag_id",
+          value: form.google_tag_id || "",
         },
       ];
 
@@ -453,6 +467,35 @@ export default function SuperAdminIntegrations() {
                 onChange={(e) => setForm((prev) => ({ ...prev, resend_api_key: e.target.value }))}
               />
               <p className="text-xs text-muted-foreground">Chave privada usada para chamadas HTTP à API do Resend.</p>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border-border/60 bg-card text-card-foreground">
+          <CardHeader>
+            <CardTitle className="text-sm font-medium text-foreground">Marketing & Analytics</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label>Facebook Pixel ID</Label>
+              <Input
+                className="bg-background dark:bg-secondary text-foreground border-border"
+                value={form.facebook_pixel_id || ""}
+                onChange={(e) => setForm((prev) => ({ ...prev, facebook_pixel_id: e.target.value }))}
+                placeholder="Ex: 123456789012345"
+              />
+              <p className="text-xs text-muted-foreground">ID do Pixel do Facebook para rastreamento de eventos.</p>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Google Tag (GTM / Analytics)</Label>
+              <Input
+                className="bg-background dark:bg-secondary text-foreground border-border"
+                value={form.google_tag_id || ""}
+                onChange={(e) => setForm((prev) => ({ ...prev, google_tag_id: e.target.value }))}
+                placeholder="Ex: GTM-XXXXXXX ou G-XXXXXXXXXX"
+              />
+              <p className="text-xs text-muted-foreground">ID da Tag do Google para métricas e rastreamento.</p>
             </div>
           </CardContent>
         </Card>
