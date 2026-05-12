@@ -10,6 +10,7 @@ import {
   LogOut,
   ChevronRight,
   Menu,
+  LineChart,
 } from "lucide-react";
 
 import { useAuth } from "@/contexts/AuthContext";
@@ -26,6 +27,7 @@ const navItems = [
   { to: "/superadmin/plans", icon: Layers3, label: "Planos" },
   { to: "/superadmin/billing", icon: CreditCard, label: "Faturamento" },
   { to: "/superadmin/team", icon: Users, label: "Equipe" },
+  { to: "/superadmin/marketing", icon: LineChart, label: "Marketing" },
   { to: "/superadmin/integrations", icon: Settings2, label: "Integrações" },
 ];
 
