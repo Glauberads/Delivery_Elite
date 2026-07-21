@@ -17,6 +17,7 @@ import TrackOrder from "./pages/TrackOrder";
 import NotFound from "./pages/NotFound";
 import Index from "./pages/Index";
 import { AnalyticsInjector } from "./components/AnalyticsInjector";
+import { DomainResolver } from "./components/DomainResolver";
 
 // Páginas de tenant (restaurante)
 import Dashboard from "./pages/Dashboard";
@@ -61,7 +62,7 @@ function App() {
               <AnalyticsInjector />
               <Routes>
               {/* ── Rotas Públicas ────────────────────────────── */}
-              <Route path="/" element={<Index />} />
+              <Route path="/" element={<DomainResolver />} />
               <Route path="/login" element={<Login />} />
               <Route path="/forgot-password" element={<ForgotPassword />} />
               <Route path="/reset-password" element={<ResetPassword />} />

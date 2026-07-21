@@ -1,5 +1,5 @@
 import React from "react";
-import { Clock3, CreditCard, Palette, Store } from "lucide-react";
+import { Clock3, CreditCard, Palette, Store, Globe } from "lucide-react";
 import { Header } from "@/components/layout/Header";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,8 +8,12 @@ import { OperatingHoursForm } from "@/components/settings/OperatingHoursForm";
 import { PaymentMethodsManager } from "@/components/settings/PaymentMethodsManager";
 import { VisualIdentityForm } from "@/components/customization/VisualIdentityForm";
 import { ImagesManager } from "@/components/customization/ImagesManager";
+import { CustomDomainManager } from "@/components/settings/CustomDomainManager";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function TenantSettings() {
+  const { user } = useAuth();
+
   return (
     <div className="flex flex-col h-full">
       <Header title="Configurações" />
@@ -28,22 +32,26 @@ export default function TenantSettings() {
         </div>
 
         <Tabs defaultValue="general" className="w-full space-y-4 md:space-y-6">
-          <TabsList className="grid w-full grid-cols-2 gap-2 rounded-2xl bg-muted/50 p-1 md:grid-cols-4">
-            <TabsTrigger value="general" className="gap-2 rounded-xl">
+          <TabsList className="flex flex-wrap w-full gap-2 rounded-2xl bg-muted/50 p-1">
+            <TabsTrigger value="general" className="flex-1 gap-2 rounded-xl">
               <Store className="h-4 w-4" />
               Geral
             </TabsTrigger>
-            <TabsTrigger value="hours" className="gap-2">
+            <TabsTrigger value="hours" className="flex-1 gap-2">
               <Clock3 className="h-4 w-4" />
               Horários
             </TabsTrigger>
-            <TabsTrigger value="payments" className="gap-2">
+            <TabsTrigger value="payments" className="flex-1 gap-2">
               <CreditCard className="h-4 w-4" />
               Pagamentos
             </TabsTrigger>
-            <TabsTrigger value="customization" className="gap-2">
+            <TabsTrigger value="customization" className="flex-1 gap-2">
               <Palette className="h-4 w-4" />
               Customização
+            </TabsTrigger>
+            <TabsTrigger value="domain" className="flex-1 gap-2">
+              <Globe className="h-4 w-4" />
+              Domínio
             </TabsTrigger>
           </TabsList>
 
@@ -57,6 +65,10 @@ export default function TenantSettings() {
 
           <TabsContent value="payments" className="mt-3 space-y-4 md:mt-0">
             <PaymentMethodsManager />
+          </TabsContent>
+          
+          <TabsContent value="domain" className="mt-3 space-y-4 md:mt-0">
+            {user?.tenantId && <CustomDomainManager tenantId={user.tenantId} />}
           </TabsContent>
 
           <TabsContent value="customization" className="mt-3 space-y-4 md:mt-0">

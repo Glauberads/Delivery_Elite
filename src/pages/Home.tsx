@@ -51,7 +51,7 @@ interface Restaurant {
   phone: string | null;
 }
 
-export default function Home() {
+export default function Home({ overrideSlug }: { overrideSlug?: string }) {
   const {
     slug,
     tenantId,
@@ -62,7 +62,7 @@ export default function Home() {
     isError: isPublicTenantError,
     isBillingBlocked,
     isOutsideBusinessHours,
-  } = usePublicTenant();
+  } = usePublicTenant(overrideSlug);
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [cartItems, setCartItems] = useState<

@@ -162,8 +162,9 @@ function isBlockedByTenantFallback(tenant: PublicTenant) {
   return false;
 }
 
-export function usePublicTenant() {
-  const { slug } = useParams<{ slug: string }>();
+export function usePublicTenant(overrideSlug?: string) {
+  const { slug: routeSlug } = useParams<{ slug: string }>();
+  const slug = overrideSlug || routeSlug;
 
   const query = useQuery<PublicTenantPayload | null, Error>({
     queryKey: ["public-tenant", slug],
