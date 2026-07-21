@@ -127,14 +127,14 @@ export function Sidebar({ className, collapsed = false, onCollapsedChange }: Sid
             to="/dashboard" 
             className="flex items-center gap-2 group transition-all duration-300 hover:scale-105"
           >
-            <img src="/icon.svg" alt="VIP Delivery" className="h-8 w-8 object-contain shadow-lg transition-all duration-300 group-hover:scale-105" />
+            <img src="/icon.svg" alt="VipDelivery" className="h-8 w-8 object-contain shadow-lg transition-all duration-300 group-hover:scale-105" />
             <span className="font-heading font-bold text-lg bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent transition-all duration-300 group-hover:from-delivery-500 group-hover:to-delivery-600">
-              VIP Delivery
+              VipDelivery
             </span>
           </Link>
         )}
         {collapsed && (
-          <img src="/icon.svg" alt="VIP Delivery" className="h-8 w-8 ml-6 object-contain shadow-lg transition-all duration-300 hover:scale-110 cursor-pointer" />
+          <img src="/icon.svg" alt="VipDelivery" className="h-8 w-8 ml-6 object-contain shadow-lg transition-all duration-300 hover:scale-110 cursor-pointer" />
         )}
         <Button
           variant="ghost"

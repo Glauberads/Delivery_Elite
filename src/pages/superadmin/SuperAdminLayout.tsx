@@ -68,12 +68,12 @@ function SuperAdminSidebar({ collapsed, onCollapsedChange, className }: SidebarP
           >
             <img
               src="/icon.svg"
-              alt="VIP Delivery"
+              alt="VipDelivery"
               className="h-8 w-8 object-contain shadow-lg transition-all duration-300 group-hover:scale-105"
             />
             <div className="min-w-0">
               <p className="bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text font-heading text-lg font-bold text-transparent transition-all duration-300 group-hover:from-delivery-500 group-hover:to-delivery-600">
-                VIP Delivery
+                VipDelivery
               </p>
               <p className="text-xs text-muted-foreground">Super Admin</p>
             </div>
@@ -81,7 +81,7 @@ function SuperAdminSidebar({ collapsed, onCollapsedChange, className }: SidebarP
         ) : (
           <img
             src="/icon.svg"
-            alt="VIP Delivery"
+            alt="VipDelivery"
             className="ml-6 h-8 w-8 cursor-pointer object-contain shadow-lg transition-all duration-300 hover:scale-110"
           />
         )}
@@ -253,12 +253,12 @@ function SuperAdminMobileNav() {
         >
           <img
             src="/icon.svg"
-            alt="VIP Delivery"
+            alt="VipDelivery"
             className="h-8 w-8 rounded-xl object-contain shadow-lg transition-all duration-300 group-hover:scale-105"
           />
           <div className="min-w-0">
             <span className="bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text font-heading text-lg font-bold text-transparent transition-all duration-300 group-hover:from-delivery-500 group-hover:to-delivery-600">
-              VIP Delivery
+              VipDelivery
             </span>
             <p className="text-xs text-muted-foreground">Super Admin</p>
           </div>
@@ -279,12 +279,12 @@ function SuperAdminMobileNav() {
             >
               <img
                 src="/icon.svg"
-                alt="VIP Delivery"
+                alt="VipDelivery"
                 className="h-8 w-8 rounded-xl object-contain shadow-lg transition-all duration-300 group-hover:scale-105"
               />
               <div>
                 <span className="bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text font-heading text-lg font-bold text-transparent transition-all duration-300 group-hover:from-delivery-500 group-hover:to-delivery-600">
-                  VIP Delivery
+                  VipDelivery
                 </span>
                 <p className="text-xs text-muted-foreground">Super Admin</p>
               </div>

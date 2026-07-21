@@ -8,9 +8,9 @@ export type PlatformResendConfig = {
   senderName: string;
 };
 
-const DEFAULT_SENDER_NAME = "VIP Delivery";
-const DEFAULT_SENDER_EMAIL = "contato@overflex.cloud";
-const FIXED_FROM = "VIP Delivery <contato@overflex.cloud>";
+const DEFAULT_SENDER_NAME = "VipDelivery";
+const DEFAULT_SENDER_EMAIL = "contato@vipdelivery.com.br";
+const FIXED_FROM = "VipDelivery <contato@vipdelivery.com.br>";
 
 type PlatformEmailInput = {
   to: string;

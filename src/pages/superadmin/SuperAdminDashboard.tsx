@@ -157,7 +157,7 @@ export default function SuperAdminDashboard() {
     <div className="p-6 space-y-6">
       <div>
         <h1 className="text-2xl font-bold">Dashboard</h1>
-        <p className="mt-1 text-sm text-muted-foreground">Visão geral da plataforma VIP Delivery</p>
+        <p className="mt-1 text-sm text-muted-foreground">Visão geral da plataforma VipDelivery</p>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">

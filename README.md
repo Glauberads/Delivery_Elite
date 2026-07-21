@@ -1,8 +1,8 @@
-# 🍕 VIP Delivery
+# 🍕 VipDelivery
 
 > Sistema completo de gestão de pedidos e entregas para restaurantes e estabelecimentos alimentícios
 
-![VIP Delivery](https://img.shields.io/badge/Status-Produção-brightgreen)
+![VipDelivery](https://img.shields.io/badge/Status-Produção-brightgreen)
 ![React](https://img.shields.io/badge/React-18.3.1-blue)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.5.3-blue)
 ![Supabase](https://img.shields.io/badge/Supabase-Backend-green)
@@ -10,7 +10,7 @@
 
 ## 📋 Sobre o Projeto
 
-O **VIP Delivery** é uma solução completa e moderna para gestão de pedidos, entregas e operações de restaurantes. Desenvolvido com foco em performance, escalabilidade e experiência do usuário, oferece todas as ferramentas necessárias para gerenciar um negócio de alimentação de forma eficiente.
+O **VipDelivery** é uma solução completa e moderna para gestão de pedidos, entregas e operações de restaurantes. Desenvolvido com foco em performance, escalabilidade e experiência do usuário, oferece todas as ferramentas necessárias para gerenciar um negócio de alimentação de forma eficiente.
 
 ### ✨ Principais Funcionalidades
 
@@ -22,6 +22,18 @@ O **VIP Delivery** é uma solução completa e moderna para gestão de pedidos, 
 - 💰 **PDV Integrado**: Ponto de venda para atendimento presencial
 - ⚙️ **Configurações**: Personalização completa do estabelecimento
 - 📱 **Responsivo**: Interface adaptada para desktop, tablet e mobile
+
+## 💎 Vantagens e Diferenciais (Foco em Marketing)
+
+O VipDelivery foi projetado não apenas para funcionar bem, mas para gerar resultados reais para o negócio.
+
+- **Fim das Taxas Abusivas**: Pare de pagar porcentagens altas para marketplaces. O lucro é 100% seu.
+- **Gestão Visual Kanban**: Reduza erros e aumente a velocidade da cozinha com controle visual.
+- **Experiência Premium**: Cardápio rápido e atraente que aumenta a conversão de vendas.
+- **Dados que Vendem**: Dashboard completo para entender seu negócio e lucrar mais.
+
+> 📄 Para uma visão detalhada das vantagens, ganchos de vendas e estratégias de marketing, consulte a [Documentação de Marketing](DOCUMENTACAO_MARKETING.md).
+
 
 ## 🏗️ Arquitetura e Tecnologias
 
@@ -63,7 +75,7 @@ O **VIP Delivery** é uma solução completa e moderna para gestão de pedidos, 
 
 ```bash
 git clone <url-do-repositorio>
-cd "VIP Delivery"
+cd "VipDelivery"
 ```
 
 ### 2. Instale as dependências

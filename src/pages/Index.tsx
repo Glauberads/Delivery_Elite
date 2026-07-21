@@ -177,7 +177,7 @@ export default function Index() {
       <header className="sticky top-0 z-50 border-b border-border/60 bg-background/80 backdrop-blur-xl">
         <div className={cn(landingContainerClass, "flex h-16 items-center justify-between gap-2 md:gap-4")}>
           <Link to="/" className="flex min-w-0 flex-1 items-center gap-3 md:flex-none">
-            <img src="/vip-delivery-logo-hero.png" alt="VIP Delivery" className="h-12 w-auto object-contain" />
+            <img src="/vip-delivery-logo-hero.png" alt="VipDelivery" className="h-12 w-auto object-contain" />
           </Link>
 
           <nav className="hidden items-center gap-6 md:flex">
@@ -206,7 +206,7 @@ export default function Index() {
               </SheetTrigger>
               <SheetContent side="right" className="w-[85vw] max-w-none border-border/60 bg-background/95 p-6 sm:max-w-sm">
                 <div className="flex items-center gap-3 border-b border-border/60 pb-5 pr-10">
-                  <img src="/vip-delivery-logo-hero.png" alt="VIP Delivery" className="h-12 w-auto object-contain" />
+                  <img src="/vip-delivery-logo-hero.png" alt="VipDelivery" className="h-12 w-auto object-contain" />
                 </div>
 
                 <div className="mt-6 space-y-2">
@@ -298,7 +298,7 @@ export default function Index() {
             <div className="relative">
               <img
                 src="/vip-delivery-logo-hero.png"
-                alt="VIP Delivery"
+                alt="VipDelivery"
                 className="block h-auto w-full object-contain drop-shadow-2xl"
               />
 
@@ -369,7 +369,7 @@ export default function Index() {
                   <h3 className="text-2xl font-semibold">{feature.title}</h3>
                   <p className="mt-4 text-sm leading-7 text-muted-foreground">{feature.description}</p>
                   <div className="mt-auto pt-8 text-xs font-semibold uppercase tracking-[0.22em] text-primary">
-                    VIP Delivery
+                    VipDelivery
                   </div>
                 </CardContent>
               </Card>
@@ -381,7 +381,7 @@ export default function Index() {
               <p className="text-sm font-semibold uppercase tracking-[0.22em] text-primary">Performance operacional</p>
               <h3 className="mt-4 text-3xl font-bold tracking-tight">Mais margem, menos ruído e controle real da loja</h3>
               <p className="mt-4 text-base leading-8 text-muted-foreground">
-                O VIP Delivery foi desenhado para centralizar cardápio, atendimento, pagamentos, painel administrativo e gestão do negócio.
+                O VipDelivery foi desenhado para centralizar cardápio, atendimento, pagamentos, painel administrativo e gestão do negócio.
               </p>
             </div>
 
@@ -556,7 +556,7 @@ export default function Index() {
                 <p className="text-sm font-semibold uppercase tracking-[0.22em] text-primary">Pronto para vender mais?</p>
                 <h2 className="mt-4 text-4xl font-bold tracking-tight">Coloque seu delivery online com operação profissional</h2>
                 <p className="mt-4 max-w-2xl text-lg leading-8 text-muted-foreground">
-                  Teste o VIP Delivery e coloque cardápio, pedidos, checkout e painel no mesmo fluxo.
+                  Teste o VipDelivery e coloque cardápio, pedidos, checkout e painel no mesmo fluxo.
                 </p>
               </div>
 
@@ -576,7 +576,7 @@ export default function Index() {
       <footer className="border-t border-border/60 bg-card/40 py-10">
         <div className="container flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
           <div className="flex items-center gap-3">
-            <img src="/vip-delivery-logo-hero.png" alt="VIP Delivery" className="h-12 w-auto object-contain" />
+            <img src="/vip-delivery-logo-hero.png" alt="VipDelivery" className="h-12 w-auto object-contain" />
           </div>
 
           <div className="flex flex-wrap gap-6 text-sm text-muted-foreground">

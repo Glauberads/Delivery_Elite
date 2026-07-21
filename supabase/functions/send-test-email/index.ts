@@ -101,15 +101,15 @@ Deno.serve(async (request) => {
 
     await sendPlatformEmail(resendConfig, {
       to: targetEmail,
-      subject: "Teste de Email - VIP Delivery",
+      subject: "Teste de Email - VipDelivery",
       html: `
         <div style="font-family: Arial, sans-serif; color: #111827; line-height: 1.6;">
           <h2 style="margin-bottom: 8px;">Teste de envio concluído</h2>
-          <p>Este é um e-mail de teste do <strong>VIP Delivery</strong>.</p>
+          <p>Este é um e-mail de teste do <strong>VipDelivery</strong>.</p>
           <p>Se você recebeu esta mensagem, a configuração do Resend está funcionando corretamente.</p>
         </div>
       `,
-      text: "Teste de envio concluido.\n\nEste e-mail confirma que a configuracao do Resend do VIP Delivery esta funcionando corretamente.",
+      text: "Teste de envio concluido.\n\nEste e-mail confirma que a configuracao do Resend do VipDelivery esta funcionando corretamente.",
     });
 
     return jsonResponse({

@@ -19,7 +19,7 @@ type PasswordRecoveryPayload = {
 const supabaseAdmin = createSupabaseAdminClient();
 
 function getResetUrl(redirectTo?: string | null) {
-  return resolveAllowedRedirectUrl(redirectTo, "https://delivery.overflex.cloud/reset-password");
+  return resolveAllowedRedirectUrl(redirectTo, "https://app.vipdelivery.com.br/reset-password");
 }
 
 async function generateRecoveryUrl(email: string, redirectTo?: string | null) {

@@ -4,7 +4,7 @@ import { createSupabaseAdminClient, corsHeaders, jsonResponse } from "../_shared
 import { loadResendConfig, sendPlatformEmail } from "../_shared/platform-email.ts";
 
 const supabaseAdmin = createSupabaseAdminClient();
-const RENEWAL_URL = "https://delivery.overflex.cloud/admin/profile?billing=renew";
+const RENEWAL_URL = "https://app.vipdelivery.com.br/admin/profile?billing=renew";
 
 type TenantRow = {
   id: string;

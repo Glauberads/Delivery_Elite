@@ -23,8 +23,8 @@ type SignupEmailPayload = {
 };
 
 const supabaseAdmin = createSupabaseAdminClient();
-const DEFAULT_SIGNUP_REDIRECT_URL = "https://delivery.overflex.cloud/admin/profile?tab=profile&onboarding=complete";
-const EMAIL_LOGO_URL = "https://delivery.overflex.cloud/logo-w.png";
+const DEFAULT_SIGNUP_REDIRECT_URL = "https://app.vipdelivery.com.br/admin/profile?tab=profile&onboarding=complete";
+const EMAIL_LOGO_URL = "https://app.vipdelivery.com.br/logo-w.png";
 
 function getDisplayName(fullName?: string | null) {
   const normalized = String(fullName ?? "").trim();
@@ -95,7 +95,7 @@ function buildSignupEmail(input: {
   storeName: string;
   confirmationUrl: string;
 }) {
-  const subject = "Bem-vindo ao VIP Delivery";
+  const subject = "Bem-vindo ao VipDelivery";
 
   return {
     subject,
@@ -103,12 +103,12 @@ function buildSignupEmail(input: {
       <div style="margin:0;padding:32px;background:#f4f4f7;font-family:Inter,Segoe UI,Arial,sans-serif;color:#f8fafc;">
         <div style="max-width:640px;margin:0 auto;border-radius:32px;overflow:hidden;background:#1a1f2e;box-shadow:0 28px 64px rgba(15,23,42,0.30);border:1px solid rgba(255,255,255,0.10);">
           <div style="padding:36px 32px 18px;background:#1a1f2e;text-align:center;">
-            <img src="${EMAIL_LOGO_URL}" alt="VIP Delivery" style="display:block;width:100%;max-width:160px;height:auto;margin:0 auto 22px;" />
+            <img src="${EMAIL_LOGO_URL}" alt="VipDelivery" style="display:block;width:100%;max-width:160px;height:auto;margin:0 auto 22px;" />
             <div style="display:inline-block;padding:8px 14px;border-radius:999px;background:#475569;color:#ffffff;font-size:11px;font-weight:800;letter-spacing:0.18em;text-transform:uppercase;">
               Boas-vindas
             </div>
             <h1 style="margin:18px 0 10px;font-size:32px;line-height:1.15;color:#f8fafc;font-weight:800;">
-              Confirme seu acesso ao VIP Delivery
+              Confirme seu acesso ao VipDelivery
             </h1>
             <p style="margin:0;color:#cbd5e1;font-size:15px;line-height:1.7;">
               Sua conta esta quase pronta. Falta apenas validar o acesso.
@@ -118,7 +118,7 @@ function buildSignupEmail(input: {
             <div style="padding:28px;border-radius:24px;background:#23293b;border:1px solid rgba(255,255,255,0.10);color:#f8fafc;font-size:15px;line-height:1.75;">
               <p style="margin:0 0 16px;">Ola, <strong>${escapeHtml(input.fullName)}</strong>.</p>
               <p style="margin:0 0 16px;">O cadastro da loja <strong>${escapeHtml(input.storeName)}</strong> foi iniciado com sucesso.</p>
-              <p style="margin:0;">Clique no botao abaixo para validar sua conta e acessar o painel do VIP Delivery.</p>
+              <p style="margin:0;">Clique no botao abaixo para validar sua conta e acessar o painel do VipDelivery.</p>
               <div style="margin-top:28px;">
                 <a href="${escapeHtml(input.confirmationUrl)}" style="display:inline-block;padding:14px 22px;border-radius:14px;background:#ef4444;color:#ffffff;text-decoration:none;font-weight:700;">
                   Validar conta e acessar
@@ -126,7 +126,7 @@ function buildSignupEmail(input: {
               </div>
             </div>
             <p style="margin:18px 0 0;color:#94a3b8;font-size:12px;line-height:1.6;text-align:center;">
-              VIP Delivery · comunicacao automatizada da sua operacao SaaS.
+              VipDelivery · comunicacao automatizada da sua operacao SaaS.
             </p>
           </div>
         </div>
@@ -137,10 +137,10 @@ function buildSignupEmail(input: {
       "",
       `Ola, ${input.fullName}.`,
       `O cadastro da loja ${input.storeName} foi iniciado com sucesso.`,
-      "Clique no link abaixo para validar sua conta e acessar o painel do VIP Delivery:",
+      "Clique no link abaixo para validar sua conta e acessar o painel do VipDelivery:",
       input.confirmationUrl,
       "",
-      "VIP Delivery",
+      "VipDelivery",
     ].join("\n"),
   };
 }

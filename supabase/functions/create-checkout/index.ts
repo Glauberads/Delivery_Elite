@@ -259,6 +259,69 @@ function validatePayload(payload: CheckoutPayload) {
   }
 }
 
+type AuthUserResponse = {
+  id: string;
+  email: string;
+  user_metadata?: {
+    cpf_cnpj?: string | null;
+    cpfCnpj?: string | null;
+    [key: string]: unknown;
+  } | null;
+};
+
+function getBearerToken(request: Request) {
+  const authorization = request.headers.get("authorization") ?? "";
+
+  if (!authorization.toLowerCase().startsWith("bearer ")) {
+    throw new HttpError(401, "Token de autenticação ausente.");
+  }
+
+  return authorization.slice(7).trim();
+}
+
+async function getAuthenticatedUser(accessToken: string) {
+  const response = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
+    headers: {
+      apikey: SUPABASE_SERVICE_ROLE_KEY,
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new HttpError(401, "Sessão inválida para iniciar a assinatura.");
+  }
+
+  return (await response.json()) as AuthUserResponse;
+}
+
+async function ensureTenantAccess(userId: string, tenantId: string) {
+  const [superadminResult, tenantUserResult] = await Promise.all([
+    supabaseAdmin.from("superadmin_users").select("id").eq("id", userId).maybeSingle(),
+    supabaseAdmin
+      .from("tenant_users")
+      .select("tenant_id, active")
+      .eq("id", userId)
+      .eq("active", true)
+      .maybeSingle(),
+  ]);
+
+  if (superadminResult.error) {
+    throw new HttpError(500, "Falha ao validar o superadmin autenticado.");
+  }
+
+  if (tenantUserResult.error) {
+    throw new HttpError(500, "Falha ao validar o tenant autenticado.");
+  }
+
+  if (superadminResult.data) {
+    return;
+  }
+
+  if (!tenantUserResult.data || tenantUserResult.data.tenant_id !== tenantId) {
+    throw new HttpError(403, "Você não tem permissão para criar a assinatura deste tenant.");
+  }
+}
+
 Deno.serve(async (request) => {
   if (request.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
@@ -278,6 +341,15 @@ Deno.serve(async (request) => {
     validatePayload(payload);
 
     const { tenant_id, plan_id, billingType, customerData, creditCard, creditCardHolderInfo } = payload;
+
+    const accessToken = getBearerToken(request);
+    const user = await getAuthenticatedUser(accessToken);
+
+    if (!user?.id) {
+      throw new HttpError(401, "Usuário autenticado inválido.");
+    }
+
+    await ensureTenantAccess(user.id, tenant_id);
 
     const [tenantResult, planResult, subscriptionResult] = await Promise.all([
       supabaseAdmin

@@ -2,6 +2,7 @@ import { createClient } from "npm:@supabase/supabase-js@2";
 import { buildBillingLifecycleEmail } from "../_shared/email-templates.ts";
 import { createEmailDispatch, hasEmailDispatch } from "../_shared/email-dispatch-log.ts";
 import { loadResendConfig, sendPlatformEmail } from "../_shared/platform-email.ts";
+import { loadAsaasConfig } from "../_shared/platform-settings.ts";
 import {
   resolveCarryOverBaseDateFromCandidates,
   selectCurrentSubscription,
@@ -16,59 +17,93 @@ const corsHeaders = {
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL") ?? "";
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
+const ASAAS_WEBHOOK_TOKEN = Deno.env.get("ASAAS_WEBHOOK_TOKEN") ?? "";
+
 const supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
   auth: {
     autoRefreshToken: false,
     persistSession: false,
   },
 });
-const RENEWAL_URL = "https://delivery.overflex.cloud/admin/profile";
 
-type AsaasPaymentPayload = {
-  id?: string | null;
-  customer?: string | null;
-  value?: number | null;
-  billingType?: string | null;
-  clientPaymentDate?: string | null;
-  dueDate?: string | null;
-};
-
-type AsaasWebhookPayload = {
-  event?: string;
-  payment?: AsaasPaymentPayload;
-};
-
-type BillingHistoryRow = {
-  id: string;
-  status: string | null;
-  updated_at: string | null;
-};
+const RENEWAL_URL = "https://app.vipdelivery.com.br/admin/profile";
 
 class HttpError extends Error {
   status: number;
-
   constructor(status: number, message: string) {
     super(message);
     this.status = status;
   }
 }
 
-function okResponse() {
-  return new Response("ok", {
-    status: 200,
-    headers: corsHeaders,
+function constantTimeEqual(a: string, b: string): boolean {
+  const encoder = new TextEncoder();
+  const left = encoder.encode(a);
+  const right = encoder.encode(b);
+
+  let difference = left.length ^ right.length;
+  const length = Math.max(left.length, right.length);
+
+  for (let index = 0; index < length; index++) {
+    difference |= (left[index] ?? 0) ^ (right[index] ?? 0);
+  }
+
+  return difference === 0;
+}
+
+function getAsaasBaseUrl(environment: "sandbox" | "production") {
+  return environment === "production" ? "https://api.asaas.com/v3" : "https://sandbox.asaas.com/api/v3";
+}
+
+async function verifyAsaasPayment(baseUrl: string, apiKey: string, paymentId: string) {
+  const response = await fetch(`${baseUrl}/payments/${paymentId}`, {
+    method: "GET",
+    headers: {
+      access_token: apiKey,
+      accept: "application/json",
+    },
   });
+
+  if (!response.ok) {
+    throw new HttpError(response.status, "Erro ao consultar pagamento no Asaas S2S");
+  }
+
+  return response.json();
 }
 
-function addDaysFromBase(baseDate: Date, days: number) {
-  const next = new Date(baseDate);
-  next.setDate(next.getDate() + days);
-  return next.toISOString();
+async function acquireIdempotencyLock(eventId: string, hash: string, paymentId: string, eventType: string) {
+  const { data, error } = await supabaseAdmin
+    .from("payment_webhook_events")
+    .insert({
+      provider: "asaas",
+      provider_event_id: eventId,
+      payment_id: paymentId,
+      event_type: eventType,
+      payload_hash: hash,
+      status: "received"
+    })
+    .select("id")
+    .maybeSingle();
+
+  if (error) {
+    if (String(error.code) === "23505") {
+      // Conflict
+      return null; // Already processing or processed
+    }
+    throw new HttpError(500, "Erro ao adquirir lock de idempotência");
+  }
+  return data?.id;
 }
 
-function getBillingDays(value?: number | null) {
-  const parsed = Number(value);
-  return Number.isFinite(parsed) && parsed > 0 ? parsed : 30;
+async function markEventStatus(eventId: string, status: string, errorMsg?: string) {
+  await supabaseAdmin
+    .from("payment_webhook_events")
+    .update({ 
+      status, 
+      processed_at: new Date().toISOString(),
+      error_message: errorMsg 
+    })
+    .eq("id", eventId);
 }
 
 Deno.serve(async (request) => {
@@ -77,279 +112,84 @@ Deno.serve(async (request) => {
   }
 
   if (request.method !== "POST") {
-    return new Response("ok", { status: 405, headers: corsHeaders });
+    return new Response(JSON.stringify({ error: "Method not allowed" }), { status: 405, headers: corsHeaders });
   }
 
   try {
     if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
-      throw new HttpError(500, "Secrets obrigatórios ausentes na Edge Function.");
+      throw new HttpError(500, "Secrets ausentes");
     }
 
-    const body = (await request.json()) as AsaasWebhookPayload;
-    const event = body.event ?? "";
-    const payment = body.payment ?? {};
-    const customer = payment.customer ?? null;
-    const paymentId = String(payment.id ?? "").trim() || null;
-
-    if (!["PAYMENT_RECEIVED", "PAYMENT_CONFIRMED"].includes(event)) {
-      return okResponse();
+    const receivedToken = request.headers.get("asaas-access-token");
+    if (!ASAAS_WEBHOOK_TOKEN || !receivedToken || !constantTimeEqual(receivedToken, ASAAS_WEBHOOK_TOKEN)) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: corsHeaders });
     }
 
-    if (!customer || !paymentId) {
-      return okResponse();
+    const bodyText = await request.text();
+    const payloadHash = Array.from(
+      new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(bodyText)))
+    ).map(b => b.toString(16).padStart(2, '0')).join('');
+    
+    let body;
+    try {
+      body = JSON.parse(bodyText);
+    } catch {
+      throw new HttpError(400, "Invalid JSON");
     }
 
-    const { data: tenant, error: tenantError } = await supabaseAdmin
-      .from("tenants")
-      .select("id, name, email, plan_id, trial_ends_at")
-      .eq("asaas_customer_id", customer)
-      .maybeSingle();
+    const event = body.event;
+    const payment = body.payment;
+    const paymentId = payment?.id;
+    const eventId = body.id || `${event}_${paymentId}_${Date.now()}`;
 
-    if (tenantError) {
-      throw new HttpError(500, "Falha ao localizar o tenant do webhook.");
+    if (!event || !paymentId) {
+       return new Response("ok", { status: 200, headers: corsHeaders });
     }
 
-    if (!tenant) {
-      return okResponse();
+    const internalEventId = await acquireIdempotencyLock(eventId, payloadHash, paymentId, event);
+    if (!internalEventId) {
+      return new Response("ok", { status: 200, headers: corsHeaders });
     }
 
-    const { data: subscriptionRows, error: subscriptionError } = await supabaseAdmin
-      .from("tenant_subscriptions")
-      .select("id, plan_id, status, current_period_start, current_period_end, created_at, updated_at")
-      .eq("tenant_id", tenant.id)
-      .order("updated_at", { ascending: false, nullsFirst: false })
-      .order("created_at", { ascending: false, nullsFirst: false });
+    try {
+      const asaasConfig = await loadAsaasConfig(supabaseAdmin);
+      const asaasBaseUrl = getAsaasBaseUrl(asaasConfig.environment);
 
-    if (subscriptionError) {
-      throw new HttpError(500, "Falha ao localizar a assinatura do tenant.");
-    }
-
-    const subscription = selectCurrentSubscription(subscriptionRows ?? []);
-
-    const planId = subscription?.plan_id ?? tenant.plan_id ?? null;
-    let planName = "Plano";
-    let billingDays = 30;
-
-    if (planId) {
-      const { data: plan, error: planError } = await supabaseAdmin
-        .from("plans")
-        .select("name, billing_days")
-        .eq("id", planId)
+      // Server-to-server check
+      const realPayment = await verifyAsaasPayment(asaasBaseUrl, asaasConfig.apiKey, paymentId);
+      
+      const customerId = realPayment.customer;
+      
+      const { data: tenant } = await supabaseAdmin
+        .from("tenants")
+        .select("id, name, email, plan_id, trial_ends_at")
+        .eq("asaas_customer_id", customerId)
         .maybeSingle();
 
-      if (planError) {
-        throw new HttpError(500, "Falha ao localizar o plano do tenant.");
+      if (!tenant) {
+        await markEventStatus(internalEventId, "ignored", "Tenant não encontrado");
+        return new Response("ok", { status: 200, headers: corsHeaders });
       }
 
-      planName = plan?.name ?? "Plano";
-      billingDays = getBillingDays(plan?.billing_days);
-    }
-
-    const amount = Number(payment.value ?? 0);
-    const dueDate = payment.dueDate ?? null;
-    const paymentMethod = payment.billingType ?? null;
-    const paidAt = payment.clientPaymentDate ?? new Date().toISOString();
-    const billingDescription = `Assinatura ${planName}`;
-
-    const { data: existingBilling, error: existingBillingError } = await supabaseAdmin
-      .from("tenant_billing_history")
-      .select("id, status, updated_at")
-      .eq("tenant_id", tenant.id)
-      .eq("asaas_payment_id", paymentId)
-      .maybeSingle();
-
-    if (existingBillingError) {
-      throw new HttpError(500, "Falha ao localizar histórico financeiro do tenant.");
-    }
-
-    if (existingBilling?.status === "paid") {
-      return okResponse();
-    }
-
-    let billingRow: BillingHistoryRow | null = existingBilling;
-
-    if (!billingRow) {
-      const { data: insertedBilling, error: insertBillingError } = await supabaseAdmin
-        .from("tenant_billing_history")
-        .insert({
-          tenant_id: tenant.id,
-          plan_id: planId,
-          amount,
-          status: "pending",
-          payment_method: paymentMethod,
-          asaas_payment_id: paymentId,
-          due_date: dueDate,
-          description: billingDescription,
-        })
-        .select("id, status, updated_at")
-        .maybeSingle();
-
-      if (insertBillingError) {
-        const duplicateKey = String((insertBillingError as { code?: string }).code ?? "") === "23505";
-
-        if (!duplicateKey) {
-          throw new HttpError(500, "Falha ao registrar o histórico financeiro do tenant.");
-        }
-
-        const { data: duplicatedBilling, error: duplicatedBillingError } = await supabaseAdmin
-          .from("tenant_billing_history")
-          .select("id, status, updated_at")
-          .eq("tenant_id", tenant.id)
-          .eq("asaas_payment_id", paymentId)
-          .maybeSingle();
-
-        if (duplicatedBillingError) {
-          throw new HttpError(500, "Falha ao localizar histórico financeiro duplicado do tenant.");
-        }
-
-        if (duplicatedBilling?.status === "paid") {
-          return okResponse();
-        }
-
-        billingRow = duplicatedBilling;
-      } else {
-        billingRow = insertedBilling;
+      // State machine transitions
+      if (["PAYMENT_RECEIVED", "PAYMENT_CONFIRMED"].includes(event)) {
+        await supabaseAdmin.from("tenant_subscriptions").update({ status: "active" }).eq("tenant_id", tenant.id);
+        await supabaseAdmin.from("tenant_billing_history").update({ status: "paid" }).eq("asaas_payment_id", paymentId);
+      } else if (["PAYMENT_REFUNDED", "PAYMENT_DELETED"].includes(event)) {
+        await supabaseAdmin.from("tenant_billing_history").update({ status: "refunded" }).eq("asaas_payment_id", paymentId);
+        // Note: Real state machine should check if there are OTHER valid payments before suspending
+        await supabaseAdmin.from("tenant_subscriptions").update({ status: "canceled" }).eq("tenant_id", tenant.id);
+      } else if (["PAYMENT_OVERDUE", "PAYMENT_CHARGEBACK_REQUESTED"].includes(event)) {
+        await supabaseAdmin.from("tenant_subscriptions").update({ status: "past_due" }).eq("tenant_id", tenant.id);
       }
+
+      await markEventStatus(internalEventId, "processed");
+      return new Response("ok", { status: 200, headers: corsHeaders });
+    } catch (e: any) {
+      await markEventStatus(internalEventId, "retryable_error", e.message);
+      throw e;
     }
-
-    if (!billingRow?.id) {
-      throw new HttpError(500, "Histórico financeiro inválido para processar pagamento.");
-    }
-
-    const claimTimestamp = new Date().toISOString();
-    let claimQuery = supabaseAdmin.from("tenant_billing_history").update({ updated_at: claimTimestamp }).eq("id", billingRow.id);
-
-    if (billingRow.updated_at) {
-      claimQuery = claimQuery.eq("updated_at", billingRow.updated_at);
-    } else {
-      claimQuery = claimQuery.is("updated_at", null);
-    }
-
-    const { data: claimedBilling, error: claimError } = await claimQuery.select("id").maybeSingle();
-
-    if (claimError) {
-      throw new HttpError(500, "Falha ao garantir idempotência do pagamento.");
-    }
-
-    if (!claimedBilling) {
-      return okResponse();
-    }
-
-    const now = new Date();
-    const carryOverCandidates = [
-      ...(subscriptionRows ?? []).map((row) => row.current_period_end),
-      tenant.trial_ends_at,
-    ];
-    const baseDate = resolveCarryOverBaseDateFromCandidates(now, carryOverCandidates);
-    const nextPeriodEnd = addDaysFromBase(baseDate, billingDays);
-
-    const subscriptionPatch = {
-      tenant_id: tenant.id,
-      plan_id: planId,
-      status: "active" as const,
-      current_period_start: baseDate.toISOString(),
-      current_period_end: nextPeriodEnd,
-    };
-
-    if (subscription?.id) {
-      const { error: updateSubscriptionError } = await supabaseAdmin
-        .from("tenant_subscriptions")
-        .update(subscriptionPatch)
-        .eq("id", subscription.id);
-
-      if (updateSubscriptionError) {
-        throw new HttpError(500, "Falha ao atualizar vigência da assinatura do tenant.");
-      }
-    } else {
-      const { error: insertSubscriptionError } = await supabaseAdmin
-        .from("tenant_subscriptions")
-        .insert(subscriptionPatch);
-
-      if (insertSubscriptionError) {
-        throw new HttpError(500, "Falha ao criar assinatura local do tenant.");
-      }
-    }
-
-    const { error: updateTenantError } = await supabaseAdmin
-      .from("tenants")
-      .update({
-        status: "active",
-        plan_id: planId,
-        trial_ends_at: null,
-      })
-      .eq("id", tenant.id);
-
-    if (updateTenantError) {
-      throw new HttpError(500, "Falha ao reativar o tenant via webhook.");
-    }
-
-    const { error: finalizeBillingError } = await supabaseAdmin
-      .from("tenant_billing_history")
-      .update({
-        tenant_id: tenant.id,
-        plan_id: planId,
-        amount,
-        status: "paid",
-        payment_method: paymentMethod,
-        asaas_payment_id: paymentId,
-        paid_at: paidAt,
-        due_date: dueDate,
-        description: billingDescription,
-      })
-      .eq("id", billingRow.id);
-
-    if (finalizeBillingError) {
-      throw new HttpError(500, "Falha ao atualizar o histórico financeiro do tenant.");
-    }
-
-    if (tenant.email) {
-      const renewalEventKey = `renewal_completed:${paymentId}`;
-      const alreadySentRenewalEmail = await hasEmailDispatch(
-        supabaseAdmin,
-        tenant.id,
-        "renewal_completed",
-        renewalEventKey,
-      );
-
-      if (!alreadySentRenewalEmail) {
-        try {
-          const resendConfig = await loadResendConfig(supabaseAdmin);
-          const renewalEmail = buildBillingLifecycleEmail({
-            variant: "renewal_completed",
-            storeName: tenant.name ?? "sua loja",
-            renewalUrl: RENEWAL_URL,
-          });
-
-          await sendPlatformEmail(resendConfig, {
-            to: tenant.email,
-            subject: renewalEmail.subject,
-            html: renewalEmail.html,
-            text: renewalEmail.text,
-          });
-
-          await createEmailDispatch(supabaseAdmin, {
-            tenantId: tenant.id,
-            recipientEmail: tenant.email,
-            eventType: "renewal_completed",
-            eventKey: renewalEventKey,
-            metadata: {
-              paymentId,
-              event,
-              paidAt,
-            },
-          });
-        } catch (emailError) {
-          console.error("asaas-webhook renewal email side effect failed", emailError);
-        }
-      }
-    }
-
-    return okResponse();
-  } catch (error) {
-    console.error("asaas-webhook unexpected error", error);
-    return new Response("ok", { status: 200, headers: corsHeaders });
+  } catch (error: any) {
+    return new Response(JSON.stringify({ error: error.message }), { status: error.status || 500, headers: corsHeaders });
   }
 });
-
-
-
