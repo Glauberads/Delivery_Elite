@@ -23,8 +23,8 @@ interface DeliveryTime {
   day_of_week: string | null;
 }
 
-export function RestaurantHeader() {
-  const { tenantId, restaurant, isLoading: isLoadingTenant } = usePublicTenant();
+export function RestaurantHeader({ overrideSlug }: { overrideSlug?: string }) {
+  const { tenantId, restaurant, isLoading: isLoadingTenant } = usePublicTenant(overrideSlug);
   const [businessHours, setBusinessHours] = useState<BusinessHour[]>([]);
   const [deliveryTimes, setDeliveryTimes] = useState<DeliveryTime[]>([]);
   const [error, setError] = useState(false);

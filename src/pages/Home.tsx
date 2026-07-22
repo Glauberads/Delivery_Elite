@@ -467,7 +467,7 @@ export default function Home({ overrideSlug }: { overrideSlug?: string }) {
         cartOpen ? "overflow-hidden h-screen" : ""
       }`}
     >
-      <RestaurantHeader />
+      <RestaurantHeader overrideSlug={overrideSlug} />
 
       <div className="flex flex-col flex-1">
         <div className="flex-1 p-4">
