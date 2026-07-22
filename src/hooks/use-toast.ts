@@ -17,7 +17,7 @@ const adaptedToast = (props: ToastProps) => {
   
   // Combine title and description for Sonner
   const message = title ? title : undefined;
-  const options: any = {
+  const options: Record<string, unknown> = {
     description: description,
     duration: duration,
     action: action,
