@@ -246,6 +246,7 @@ export default function Home({ overrideSlug }: { overrideSlug?: string }) {
                 groupId: g.id,
                 groupName: g.name,
                 groupBehavior: g.behavior_type
+              })))
           }));
 
           const { data: categoryData, error: categoryError } = await supabase
