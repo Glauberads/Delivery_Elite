@@ -7,6 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import { ImageIcon, Save, ExternalLink, Upload } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { fileToBase64, validateImageFile } from "@/utils/image-utils";
+import { useAuth } from "@/contexts/AuthContext";
 
 // Definição de tipos
 interface ThemeSettings {
@@ -24,6 +25,7 @@ interface RestaurantData {
 
 export function ImagesManager() {
   const { toast } = useToast();
+  const { user } = useAuth();
 
   // Estados controlados manualmente
   const [isLoaded, setIsLoaded] = useState(false);
@@ -44,7 +46,7 @@ export function ImagesManager() {
       supabase
         .from("restaurants")
         .select("*")
-        .limit(1)
+        .eq("tenant_id", user?.tenantId || "none")
         .maybeSingle()
         .then(({ data, error }) => {
           if (error) {
@@ -117,7 +119,8 @@ export function ImagesManager() {
             favicon_url: faviconUrl.trim() || null,
           },
         })
-        .eq("id", restaurantId);
+        .eq("id", restaurantId)
+        .eq("tenant_id", user?.tenantId || "none");
 
       if (error) throw error;
 
