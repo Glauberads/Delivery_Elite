@@ -277,6 +277,12 @@ export default function Home({ overrideSlug }: { overrideSlug?: string }) {
 
           setCategories(uniqueCategories);
 
+          if (uniqueCategories.length > 0) {
+            setSelectedCategory(uniqueCategories[0]);
+          } else {
+            setSelectedCategory('all');
+          }
+
           setError(false);
         } catch (error) {
           console.error("Error fetching products:", error);
