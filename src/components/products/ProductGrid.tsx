@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { ProductCard, Product, CartProduct } from "./ProductCard";
+import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -9,6 +10,8 @@ interface ProductGridProps {
   onProductsChange?: () => void;
   isLoading?: boolean;
   isError?: boolean;
+  isDragDisabled?: boolean;
+  onDragEnd?: (result: DropResult) => void;
 }
 
 export function ProductGrid({
@@ -17,6 +20,8 @@ export function ProductGrid({
   onProductsChange,
   isLoading = false,
   isError = false,
+  isDragDisabled = false,
+  onDragEnd,
 }: ProductGridProps) {
   const { toast } = useToast();
   const [localProducts, setLocalProducts] = useState<Product[]>([]);
@@ -80,17 +85,42 @@ export function ProductGrid({
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-      {localProducts.map((product) => (
-        <ProductCard
-          key={product.id}
-          product={product}
-          onAddToCart={handleAddToCart}
-          onEdit={onEdit}
-          onDelete={() => handleDelete(product.id)}
-        />
-      ))}
-    </div>
+    <DragDropContext onDragEnd={onDragEnd || (() => {})}>
+      <Droppable droppableId="products" direction="horizontal" isDropDisabled={isDragDisabled}>
+        {(provided) => (
+          <div
+            className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"
+            {...provided.droppableProps}
+            ref={provided.innerRef}
+          >
+            {localProducts.map((product, index) => (
+              <Draggable key={product.id} draggableId={product.id} index={index} isDragDisabled={isDragDisabled}>
+                {(provided, snapshot) => (
+                  <div
+                    ref={provided.innerRef}
+                    {...provided.draggableProps}
+                    {...provided.dragHandleProps}
+                    style={{
+                      ...provided.draggableProps.style,
+                      opacity: snapshot.isDragging ? 0.8 : 1,
+                      cursor: isDragDisabled ? 'default' : 'grab'
+                    }}
+                  >
+                    <ProductCard
+                      product={product}
+                      onAddToCart={handleAddToCart}
+                      onEdit={onEdit}
+                      onDelete={() => handleDelete(product.id)}
+                    />
+                  </div>
+                )}
+              </Draggable>
+            ))}
+            {provided.placeholder}
+          </div>
+        )}
+      </Droppable>
+    </DragDropContext>
   );
 }
 

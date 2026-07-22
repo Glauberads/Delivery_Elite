@@ -217,6 +217,7 @@ export default function Home({ overrideSlug }: { overrideSlug?: string }) {
             available: product.available,
             featured: product.featured || false,
             createdAt: new Date(product.created_at),
+            display_order: product.display_order,
             hasVariations: product.has_variations,
             has_variations: product.has_variations,
             extrasGroupId: product.extras_group_id,
@@ -232,7 +233,7 @@ export default function Home({ overrideSlug }: { overrideSlug?: string }) {
                 groupName: g.name,
                 groupBehavior: g.behavior_type
               })))
-          }));
+          })).sort((a: any, b: any) => (a.display_order || 0) - (b.display_order || 0));
 
           setProducts(formattedProducts);
 

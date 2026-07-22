@@ -21,6 +21,7 @@ export interface Product {
   available: boolean;
   featured?: boolean;
   createdAt: Date;
+  display_order?: number;
   addons?: ProductAddon[];
   // New unified contract fields
   hasVariations?: boolean;

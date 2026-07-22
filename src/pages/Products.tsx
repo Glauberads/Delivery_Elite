@@ -20,7 +20,8 @@ import { CategoryManager } from "@/components/products/CategoryManager";
 import { ProductAddonList } from "@/components/products/ProductAddonList";
 import { ModifierGroupManager } from "@/components/products/ModifierGroupManager";
 import type { Product as ProductCardProduct } from "@/components/products/ProductCard";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { DropResult } from "@hello-pangea/dnd";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { StatCard } from "@/components/dashboard/StatCard";
 
@@ -37,6 +38,7 @@ interface ProductRow {
   name: string;
   description: string | null;
   price: number;
+  display_order?: number;
   image_url: string | null;
   category_id: string | null;
   available: boolean | null;
@@ -67,6 +69,7 @@ export default function Products() {
   const [showCategoryManager, setShowCategoryManager] = useState(false);
   const [editingProduct, setEditingProduct] = useState<EditingProduct | null>(null);
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   // Fetch categories
   const { data: categories = [], refetch: refetchCategories } = useQuery<CategoryOption[]>({
@@ -100,7 +103,7 @@ export default function Products() {
             id,
             name
           )
-        `);
+        `).order("display_order", { ascending: true });
 
       const { data, error } = await query;
 
@@ -118,6 +121,7 @@ export default function Products() {
         name: product.name,
         description: product.description ?? "",
         price: product.price,
+        display_order: product.display_order ?? 0,
         image_url: product.image_url ?? undefined,
         imageUrl: product.image_url ?? undefined,
         category: product.categories?.name ?? "Sem categoria",
@@ -142,7 +146,52 @@ export default function Products() {
       (product.description &&
         product.description.toLowerCase().includes(searchQuery.toLowerCase()));
     return matchesCategory && matchesSearch;
-  });
+  }).sort((a, b) => (a.display_order ?? 0) - (b.display_order ?? 0));
+
+  const isDragDisabled = selectedCategory === "all" || searchQuery !== "";
+
+  const handleDragEnd = async (result: DropResult) => {
+    if (!result.destination) return;
+
+    const items = Array.from(filteredProducts);
+    const [reorderedItem] = items.splice(result.source.index, 1);
+    items.splice(result.destination.index, 0, reorderedItem);
+
+    // Otimista UI
+    queryClient.setQueryData(["products"], (oldData: ProductCardProduct[] | undefined) => {
+      if (!oldData) return oldData;
+      const newOrderMap = new Map(items.map((item, index) => [item.id, index]));
+      return oldData.map(item => {
+        if (newOrderMap.has(item.id)) {
+          return { ...item, display_order: newOrderMap.get(item.id)! };
+        }
+        return item;
+      });
+    });
+
+    const updates = items.map((item, index) => ({
+      id: item.id,
+      display_order: index,
+    }));
+
+    try {
+      await Promise.all(
+        updates.map((update) =>
+          supabase
+            .from("products")
+            .update({ display_order: update.display_order })
+            .eq("id", update.id)
+        )
+      );
+    } catch (e) {
+      toast({
+        variant: "destructive",
+        title: "Erro ao reordenar",
+        description: "Ocorreu um erro ao salvar a nova ordem.",
+      });
+      refetchProducts();
+    }
+  };
 
   const { data: productCount = 0 } = useQuery({
     queryKey: ["productCount"],
@@ -291,10 +340,18 @@ export default function Products() {
               onSelectCategory={setSelectedCategory}
             />
 
+            {isDragDisabled && (
+              <div className="mb-4 rounded-xl px-4 py-3 text-sm border border-slate-300 bg-slate-100 text-slate-800 dark:border-slate-700 dark:bg-slate-900/60 dark:text-slate-100 text-center">
+                Selecione uma categoria e limpe a busca para reorganizar os produtos.
+              </div>
+            )}
+
             <ProductGrid
               products={filteredProducts}
               onEdit={handleEditProduct}
               onProductsChange={refetchProducts}
+              isDragDisabled={isDragDisabled}
+              onDragEnd={handleDragEnd}
             />
 
             {filteredProducts.length === 0 && (

@@ -425,6 +425,7 @@ export type Database = {
           category_id: string | null;
           created_at: string | null;
           description: string | null;
+          display_order: number;
           featured: boolean | null;
           id: string;
           image_url: string | null;
@@ -438,6 +439,7 @@ export type Database = {
           category_id?: string | null;
           created_at?: string | null;
           description?: string | null;
+          display_order?: number;
           featured?: boolean | null;
           id?: string;
           image_url?: string | null;
@@ -451,6 +453,7 @@ export type Database = {
           category_id?: string | null;
           created_at?: string | null;
           description?: string | null;
+          display_order?: number;
           featured?: boolean | null;
           id?: string;
           image_url?: string | null;
