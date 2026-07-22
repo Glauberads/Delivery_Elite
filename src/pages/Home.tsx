@@ -196,6 +196,20 @@ export default function Home({ overrideSlug }: { overrideSlug?: string }) {
 
           if (productsError) throw productsError;
 
+          const { data: displayOrders, error: displayOrderError } = await supabase
+            .from("products")
+            .select("id, display_order")
+            .eq("tenant_id", tenantId);
+
+          if (displayOrderError) throw displayOrderError;
+
+          const orderMap = new Map();
+          if (displayOrders) {
+            displayOrders.forEach(p => {
+              orderMap.set(p.id, p.display_order || 0);
+            });
+          }
+
           const parseJsonArray = (value: unknown) => {
             if (Array.isArray(value)) return value;
             if (typeof value !== "string") return [];
@@ -217,7 +231,7 @@ export default function Home({ overrideSlug }: { overrideSlug?: string }) {
             available: product.available,
             featured: product.featured || false,
             createdAt: new Date(product.created_at),
-            display_order: product.display_order,
+            display_order: orderMap.get(product.id) || 0,
             hasVariations: product.has_variations,
             has_variations: product.has_variations,
             extrasGroupId: product.extras_group_id,
