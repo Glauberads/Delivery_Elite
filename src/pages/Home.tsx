@@ -246,10 +246,7 @@ export default function Home({ overrideSlug }: { overrideSlug?: string }) {
                 groupId: g.id,
                 groupName: g.name,
                 groupBehavior: g.behavior_type
-              })))
-          })).sort((a: any, b: any) => (a.display_order || 0) - (b.display_order || 0));
-
-          setProducts(formattedProducts);
+          }));
 
           const { data: categoryData, error: categoryError } = await supabase
             .from("categories")
@@ -260,6 +257,21 @@ export default function Home({ overrideSlug }: { overrideSlug?: string }) {
           if (categoryError) throw categoryError;
 
           const dbCategories = categoryData?.map(c => c.name) || [];
+
+          formattedProducts.sort((a: any, b: any) => {
+             const indexA = dbCategories.indexOf(a.category);
+             const indexB = dbCategories.indexOf(b.category);
+             
+             if (indexA !== -1 && indexB !== -1 && indexA !== indexB) {
+                 return indexA - indexB;
+             }
+             if (indexA !== -1 && indexB === -1) return -1;
+             if (indexA === -1 && indexB !== -1) return 1;
+             
+             return (a.display_order || 0) - (b.display_order || 0);
+          });
+
+          setProducts(formattedProducts);
           
           const uniqueCategories = [
             ...new Set(formattedProducts.map((product) => product.category)),
