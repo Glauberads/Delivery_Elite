@@ -251,9 +251,30 @@ export default function Home({ overrideSlug }: { overrideSlug?: string }) {
 
           setProducts(formattedProducts);
 
+          const { data: categoryData, error: categoryError } = await supabase
+            .from("categories")
+            .select("name")
+            .eq("tenant_id", tenantId)
+            .order("display_order", { ascending: true });
+            
+          if (categoryError) throw categoryError;
+
+          const dbCategories = categoryData?.map(c => c.name) || [];
+          
           const uniqueCategories = [
             ...new Set(formattedProducts.map((product) => product.category)),
           ];
+          
+          // Order uniqueCategories based on dbCategories
+          uniqueCategories.sort((a, b) => {
+             const indexA = dbCategories.indexOf(a);
+             const indexB = dbCategories.indexOf(b);
+             if (indexA === -1 && indexB === -1) return 0;
+             if (indexA === -1) return 1;
+             if (indexB === -1) return -1;
+             return indexA - indexB;
+          });
+
           setCategories(uniqueCategories);
 
           setError(false);

@@ -19,16 +19,6 @@ export function CategoryFilter({
     <div className="mb-6">
       <ScrollArea className="w-full whitespace-nowrap">
         <div className="flex space-x-2 p-1">
-          <Button
-            variant={selectedCategory === 'all' ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => onSelectCategory('all')}
-            className={cn(
-              selectedCategory === 'all' && "bg-delivery-500 hover:bg-delivery-600"
-            )}
-          >
-            Todos
-          </Button>
           {categories.map((category) => (
             <Button
               key={category}
@@ -42,6 +32,16 @@ export function CategoryFilter({
               {category}
             </Button>
           ))}
+          <Button
+            variant={selectedCategory === 'all' ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => onSelectCategory('all')}
+            className={cn(
+              selectedCategory === 'all' && "bg-delivery-500 hover:bg-delivery-600"
+            )}
+          >
+            Todos
+          </Button>
         </div>
         <ScrollBar orientation="horizontal" />
       </ScrollArea>
