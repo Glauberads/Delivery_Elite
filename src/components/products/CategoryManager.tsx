@@ -10,8 +10,9 @@ import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
 import { useToast } from "@/hooks/use-toast";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Edit, Trash2, Plus, ArrowUp, ArrowDown, Upload, ExternalLink } from "lucide-react";
+import { Edit, Trash2, Plus, Upload, ExternalLink, GripVertical } from "lucide-react";
 import { fileToBase64, validateImageFile } from "@/utils/image-utils";
+import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd";
 
 type CategoryRow = Database["public"]["Tables"]["categories"]["Row"];
 type CategoryInsert = Database["public"]["Tables"]["categories"]["Insert"];
@@ -46,6 +47,7 @@ export function CategoryManager({ open, onClose, onCategoriesUpdated, categories
   const { user } = useAuth();
   const [showForm, setShowForm] = useState(false);
   const [editingCategory, setEditingCategory] = useState<CategoryRow | null>(null);
+  const [localCategories, setLocalCategories] = useState<CategoryRow[]>([]);
   const [formData, setFormData] = useState<CategoryFormData>({
     name: "",
     description: "",
@@ -56,6 +58,8 @@ export function CategoryManager({ open, onClose, onCategoriesUpdated, categories
   const [isUploading, setIsUploading] = useState(false);
 
   useEffect(() => {
+    setLocalCategories([...categories].sort((a, b) => (a.display_order || 0) - (b.display_order || 0)));
+    
     if (editingCategory) {
       setFormData({
         name: editingCategory.name || "",
@@ -260,56 +264,47 @@ export function CategoryManager({ open, onClose, onCategoriesUpdated, categories
     }
   };
 
-  const handleMoveCategory = async (categoryId: string, direction: "up" | "down") => {
-    const categoryIndex = categories.findIndex((cat) => cat.id === categoryId);
-    if (categoryIndex === -1) return;
+  const handleDragEnd = async (result: DropResult) => {
+    if (!result.destination) return;
 
-    const currentCategory = categories[categoryIndex];
+    const sourceIndex = result.source.index;
+    const destinationIndex = result.destination.index;
 
-    if (direction === "up" && categoryIndex > 0) {
-      const prevCategory = categories[categoryIndex - 1];
+    if (sourceIndex === destinationIndex) return;
 
-      try {
-        await supabase
-          .from("categories")
-          .update({ display_order: prevCategory.display_order })
-          .eq("id", currentCategory.id);
+    const newCategories = Array.from(localCategories);
+    const [reorderedItem] = newCategories.splice(sourceIndex, 1);
+    newCategories.splice(destinationIndex, 0, reorderedItem);
 
-        await supabase
-          .from("categories")
-          .update({ display_order: currentCategory.display_order })
-          .eq("id", prevCategory.id);
+    setLocalCategories(newCategories);
 
-        onCategoriesUpdated();
-      } catch (error) {
-        toast({
-          variant: "destructive",
-          title: "Erro",
-          description: getErrorMessage(error),
-        });
-      }
-    } else if (direction === "down" && categoryIndex < categories.length - 1) {
-      const nextCategory = categories[categoryIndex + 1];
+    try {
+      const updates = newCategories.map((cat, index) => ({
+        id: cat.id,
+        display_order: index,
+      }));
 
-      try {
-        await supabase
-          .from("categories")
-          .update({ display_order: nextCategory.display_order })
-          .eq("id", currentCategory.id);
+      await Promise.all(
+        updates.map((update) =>
+          supabase
+            .from("categories")
+            .update({ display_order: update.display_order })
+            .eq("id", update.id)
+        )
+      );
 
-        await supabase
-          .from("categories")
-          .update({ display_order: currentCategory.display_order })
-          .eq("id", nextCategory.id);
-
-        onCategoriesUpdated();
-      } catch (error) {
-        toast({
-          variant: "destructive",
-          title: "Erro",
-          description: getErrorMessage(error),
-        });
-      }
+      onCategoriesUpdated();
+      toast({
+        title: "Categorias reorganizadas",
+        description: "A ordem das categorias foi atualizada com sucesso.",
+      });
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Erro ao reorganizar",
+        description: getErrorMessage(error),
+      });
+      setLocalCategories([...categories].sort((a, b) => (a.display_order || 0) - (b.display_order || 0)));
     }
   };
 
@@ -331,74 +326,86 @@ export function CategoryManager({ open, onClose, onCategoriesUpdated, categories
                 Nova Categoria
               </Button>
             </div>
-
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Ordem</TableHead>
-                  <TableHead>Nome</TableHead>
-                  <TableHead>Descrição</TableHead>
-                  <TableHead className="text-right">Ações</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {categories.map((category) => (
-                  <TableRow key={category.id}>
-                    <TableCell className="font-medium">
-                      <div className="flex items-center space-x-2">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleMoveCategory(category.id, "up")}
-                          disabled={categories.indexOf(category) === 0}
-                        >
-                          <ArrowUp className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleMoveCategory(category.id, "down")}
-                          disabled={categories.indexOf(category) === categories.length - 1}
-                        >
-                          <ArrowDown className="h-4 w-4" />
-                        </Button>
-                        {category.display_order}
-                      </div>
-                    </TableCell>
-                    <TableCell>{category.name}</TableCell>
-                    <TableCell className="max-w-[200px] truncate">
-                      {category.description}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end space-x-2">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleEditCategory(category)}
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleDeleteCategory(category.id)}
-                        >
-                          <Trash2 className="h-4 w-4 text-red-500" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-
-                {categories.length === 0 && (
+            <DragDropContext onDragEnd={handleDragEnd}>
+              <Table>
+                <TableHeader>
                   <TableRow>
-                    <TableCell colSpan={4} className="text-center py-8">
-                      Nenhuma categoria encontrada
-                    </TableCell>
+                    <TableHead className="w-[50px]"></TableHead>
+                    <TableHead>Ordem</TableHead>
+                    <TableHead>Nome</TableHead>
+                    <TableHead>Descrição</TableHead>
+                    <TableHead className="text-right">Ações</TableHead>
                   </TableRow>
-                )}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <Droppable droppableId="categories-list" direction="vertical">
+                  {(provided) => (
+                    <TableBody
+                      ref={provided.innerRef}
+                      {...provided.droppableProps}
+                    >
+                      {localCategories.map((category, index) => (
+                        <Draggable
+                          key={category.id}
+                          draggableId={category.id}
+                          index={index}
+                        >
+                          {(provided, snapshot) => (
+                            <TableRow
+                              ref={provided.innerRef}
+                              {...provided.draggableProps}
+                              className={snapshot.isDragging ? "bg-slate-100 dark:bg-slate-800 shadow-lg z-50 relative" : ""}
+                            >
+                              <TableCell className="w-[50px]">
+                                <div
+                                  {...provided.dragHandleProps}
+                                  className="cursor-grab hover:text-primary opacity-50 hover:opacity-100 active:cursor-grabbing p-2 rounded-md hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+                                >
+                                  <GripVertical className="h-5 w-5" />
+                                </div>
+                              </TableCell>
+                              <TableCell className="font-medium text-slate-500">
+                                {index + 1}
+                              </TableCell>
+                              <TableCell>{category.name}</TableCell>
+                              <TableCell className="max-w-[200px] truncate">
+                                {category.description}
+                              </TableCell>
+                              <TableCell className="text-right">
+                                <div className="flex justify-end space-x-2">
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={() => handleEditCategory(category)}
+                                  >
+                                    <Edit className="h-4 w-4" />
+                                  </Button>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={() => handleDeleteCategory(category.id)}
+                                  >
+                                    <Trash2 className="h-4 w-4 text-red-500" />
+                                  </Button>
+                                </div>
+                              </TableCell>
+                            </TableRow>
+                          )}
+                        </Draggable>
+                      ))}
+                      {provided.placeholder}
+
+                      {localCategories.length === 0 && (
+                        <TableRow>
+                          <TableCell colSpan={5} className="text-center py-8">
+                            Nenhuma categoria encontrada
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </TableBody>
+                  )}
+                </Droppable>
+              </Table>
+            </DragDropContext>
 
             <DialogFooter>
               <Button onClick={onClose}>Fechar</Button>
