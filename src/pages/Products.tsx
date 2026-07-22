@@ -75,9 +75,11 @@ export default function Products() {
   const { data: categories = [], refetch: refetchCategories } = useQuery<CategoryOption[]>({
     queryKey: ["categories"],
     queryFn: async () => {
+      const { data: tenantId } = await supabase.rpc('get_my_tenant_id');
       const { data, error } = await supabase
         .from("categories")
         .select("*")
+        .eq("tenant_id", tenantId)
         .order("display_order", { ascending: true });
 
       if (error) {
@@ -97,13 +99,15 @@ export default function Products() {
   const { data: products = [], refetch: refetchProducts } = useQuery<ProductCardProduct[]>({
     queryKey: ["products"],
     queryFn: async () => {
+      const { data: tenantId } = await supabase.rpc('get_my_tenant_id');
+      
       const query = supabase.from("products").select(`
           *,
           categories:category_id (
             id,
             name
           )
-        `).order("display_order", { ascending: true });
+        `).eq("tenant_id", tenantId).order("display_order", { ascending: true });
 
       const { data, error } = await query;
 
@@ -196,9 +200,12 @@ export default function Products() {
   const { data: productCount = 0 } = useQuery({
     queryKey: ["productCount"],
     queryFn: async () => {
+      const { data: tenantId } = await supabase.rpc('get_my_tenant_id');
+      if (!tenantId) return 0;
       const { count } = await supabase
         .from("products")
-        .select("*", { count: "exact", head: true });
+        .select("*", { count: "exact", head: true })
+        .eq("tenant_id", tenantId);
       return count || 0;
     },
   });
@@ -206,9 +213,12 @@ export default function Products() {
   const { data: categoryCount = 0 } = useQuery({
     queryKey: ["categoryCount"],
     queryFn: async () => {
+      const { data: tenantId } = await supabase.rpc('get_my_tenant_id');
+      if (!tenantId) return 0;
       const { count } = await supabase
         .from("categories")
-        .select("*", { count: "exact", head: true });
+        .select("*", { count: "exact", head: true })
+        .eq("tenant_id", tenantId);
       return count || 0;
     },
   });
@@ -216,9 +226,12 @@ export default function Products() {
   const { data: addonCount = 0 } = useQuery({
     queryKey: ["addonCount"],
     queryFn: async () => {
+      const { data: tenantId } = await supabase.rpc('get_my_tenant_id');
+      if (!tenantId) return 0;
       const { count } = await supabase
         .from("product_addons")
-        .select("*", { count: "exact", head: true });
+        .select("*", { count: "exact", head: true })
+        .eq("tenant_id", tenantId);
       return count || 0;
     },
   });
@@ -226,9 +239,12 @@ export default function Products() {
   const { data: groupCount = 0 } = useQuery({
     queryKey: ["groupCount"],
     queryFn: async () => {
+      const { data: tenantId } = await supabase.rpc('get_my_tenant_id');
+      if (!tenantId) return 0;
       const { count } = await supabase
         .from("modifier_groups")
-        .select("*", { count: "exact", head: true });
+        .select("*", { count: "exact", head: true })
+        .eq("tenant_id", tenantId);
       return count || 0;
     },
   });
