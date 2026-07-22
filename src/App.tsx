@@ -41,6 +41,7 @@ import SuperAdminTeam from "./pages/superadmin/SuperAdminTeam";
 import SuperAdminMarketing from "./pages/superadmin/SuperAdminMarketing";
 import SuperAdminIntegrations from "./pages/superadmin/SuperAdminIntegrations";
 import SuperAdminPlans from "./pages/superadmin/SuperAdminPlans";
+import SuperAdminLogs from "./pages/superadmin/SuperAdminLogs";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -104,6 +105,7 @@ function App() {
                   <Route path="/superadmin/team" element={<SuperAdminTeam />} />
                   <Route path="/superadmin/marketing" element={<SuperAdminMarketing />} />
                   <Route path="/superadmin/integrations" element={<SuperAdminIntegrations />} />
+                  <Route path="/superadmin/logs" element={<SuperAdminLogs />} />
                   <Route path="/superadmin/profile" element={<Profile />} />
                 </Route>
               </Route>

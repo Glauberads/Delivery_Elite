@@ -11,6 +11,7 @@ import {
   ChevronRight,
   Menu,
   LineChart,
+  FileText,
 } from "lucide-react";
 
 import { useAuth } from "@/contexts/AuthContext";
@@ -29,6 +30,7 @@ const navItems = [
   { to: "/superadmin/team", icon: Users, label: "Equipe" },
   { to: "/superadmin/marketing", icon: LineChart, label: "Marketing" },
   { to: "/superadmin/integrations", icon: Settings2, label: "Integrações" },
+  { to: "/superadmin/logs", icon: FileText, label: "Logs Gerais" },
 ];
 
 interface SidebarProps {
