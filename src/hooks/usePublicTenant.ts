@@ -33,6 +33,8 @@ interface PublicTenantPayload {
   restaurant: PublicRestaurant | null;
   isBillingBlocked: boolean;
   isOutsideBusinessHours: boolean;
+  schedule: any;
+  businessHours: PublicBusinessHour[];
 }
 
 type TenantSubscriptionSnapshot = {
@@ -258,6 +260,8 @@ export function usePublicTenant(overrideSlug?: string) {
         restaurant,
         isBillingBlocked,
         isOutsideBusinessHours: schedule.isOutsideBusinessHours,
+        schedule,
+        businessHours: (businessHoursResult.data ?? []) as PublicBusinessHour[],
       };
     },
   });
@@ -271,6 +275,8 @@ export function usePublicTenant(overrideSlug?: string) {
     restaurant: query.data?.restaurant ?? null,
     isBillingBlocked: query.data?.isBillingBlocked ?? false,
     isOutsideBusinessHours: query.data?.isOutsideBusinessHours ?? false,
+    schedule: query.data?.schedule ?? null,
+    businessHours: query.data?.businessHours ?? [],
     isNotFound,
     isLoading: query.isLoading,
     isError: query.isError,

@@ -62,6 +62,7 @@ export default function Home({ overrideSlug }: { overrideSlug?: string }) {
     isError: isPublicTenantError,
     isBillingBlocked,
     isOutsideBusinessHours,
+    businessHours,
   } = usePublicTenant(overrideSlug);
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
@@ -78,8 +79,6 @@ export default function Home({ overrideSlug }: { overrideSlug?: string }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [fetchAttempted, setFetchAttempted] = useState(false);
-  const [businessHours, setBusinessHours] = useState<BusinessHour[]>([]);
-  const [isLoadingBusinessHours, setIsLoadingBusinessHours] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const orderingBlocked = isBillingBlocked || isOutsideBusinessHours;
@@ -94,7 +93,7 @@ export default function Home({ overrideSlug }: { overrideSlug?: string }) {
   interface Variation { id: string; name: string; price: number; sort_order: number; }
 
   // Função para formatar horário
-  const formatTime = (timeString: string) => {
+  const formatTime = (timeString?: string | null) => {
     if (!timeString) return "";
     try {
       const [hours, minutes] = timeString.split(":");
@@ -128,9 +127,17 @@ export default function Home({ overrideSlug }: { overrideSlug?: string }) {
     // Formatar a data no padrão brasileiro (dia/mês/ano)
     const formattedDate = format(today, "dd/MM/yyyy", { locale: ptBR });
 
+    const normalizeText = (value?: string | null) => {
+      return String(value ?? "")
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .trim()
+        .toLowerCase();
+    };
+
     // Encontrar o registro para hoje
     const todayBusinessHour = businessHours.find(
-      (hour) => hour.day_of_week === dayOfWeek
+      (hour) => normalizeText(hour.day_of_week) === normalizeText(dayOfWeek)
     );
 
     if (!todayBusinessHour) {
@@ -146,40 +153,7 @@ export default function Home({ overrideSlug }: { overrideSlug?: string }) {
     )} às ${formatTime(todayBusinessHour.close_time)}`;
   };
 
-  // Efeito para carregar horários de funcionamento
-  useEffect(() => {
-    const fetchBusinessHours = async () => {
-      if (!tenantId) {
-        setBusinessHours([]);
-        return;
-      }
-
-      setIsLoadingBusinessHours(true);
-
-      try {
-        const { data, error } = await supabase
-          .from("business_hours")
-          .select("*")
-          .eq("tenant_id", tenantId)
-          .order("id");
-
-        if (error) {
-          throw error;
-        }
-
-        if (data) {
-          setBusinessHours(data);
-        }
-      } catch (error) {
-        console.error("Erro ao carregar horários de funcionamento:", error);
-        toast.error("Erro ao carregar horários de funcionamento");
-      } finally {
-        setIsLoadingBusinessHours(false);
-      }
-    };
-
-    fetchBusinessHours();
-  }, [tenantId]);
+  // Efeito para carregar horários de funcionamento removido pois vem do usePublicTenant
 
   useEffect(() => {
     if (!fetchAttempted && tenantId) {

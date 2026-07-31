@@ -24,46 +24,10 @@ interface DeliveryTime {
 }
 
 export function RestaurantHeader({ overrideSlug }: { overrideSlug?: string }) {
-  const { tenantId, restaurant, isLoading: isLoadingTenant } = usePublicTenant(overrideSlug);
-  const [businessHours, setBusinessHours] = useState<BusinessHour[]>([]);
+  const { tenantId, restaurant, isLoading: isLoadingTenant, schedule, businessHours } = usePublicTenant(overrideSlug);
   const [deliveryTimes, setDeliveryTimes] = useState<DeliveryTime[]>([]);
   const [error, setError] = useState(false);
-  const [isLoadingBusinessHours, setIsLoadingBusinessHours] = useState(false);
   const [isLoadingDeliveryTimes, setIsLoadingDeliveryTimes] = useState(false);
-
-  // Efeito para carregar horários de funcionamento
-  useEffect(() => {
-    const fetchBusinessHours = async () => {
-      if (!tenantId) {
-        setBusinessHours([]);
-        return;
-      }
-
-      setIsLoadingBusinessHours(true);
-
-      try {
-        const { data, error } = await supabase
-          .from("business_hours")
-          .select("*")
-          .eq("tenant_id", tenantId)
-          .order("id");
-
-        if (error) {
-          throw error;
-        }
-
-        if (data) {
-          setBusinessHours(data);
-        }
-      } catch (error) {
-        console.error("Erro ao carregar horários de funcionamento:", error);
-      } finally {
-        setIsLoadingBusinessHours(false);
-      }
-    };
-
-    fetchBusinessHours();
-  }, [tenantId]);
 
   // Efeito para carregar tempos de entrega
   useEffect(() => {
@@ -167,36 +131,24 @@ export function RestaurantHeader({ overrideSlug }: { overrideSlug?: string }) {
 
   // Check if restaurant is currently open based on business_hours
   const isOpenNow = () => {
-    if (!businessHours || businessHours.length === 0) return false;
+    return schedule?.isOpenNow ?? false;
+  };
 
-    const now = new Date();
-    const currentTime = `${now.getHours().toString().padStart(2, "0")}:${now
-      .getMinutes()
-      .toString()
-      .padStart(2, "0")}`;
-    const currentDayOfWeek = getCurrentDayOfWeek();
-
-    // Encontrar o registro para hoje
-    const todayBusinessHour = businessHours.find(
-      (hour) => hour.day_of_week === currentDayOfWeek
-    );
-
-    if (!todayBusinessHour) return false;
-    if (todayBusinessHour.is_closed) return false;
-
-    return (
-      currentTime >= formatTime(todayBusinessHour.open_time) &&
-      currentTime <= formatTime(todayBusinessHour.close_time)
-    );
+  const normalizeText = (value?: string | null) => {
+    return String(value ?? "")
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .trim()
+      .toLowerCase();
   };
 
   // Get today's open and close times
   const getTodayHours = () => {
     if (!businessHours || businessHours.length === 0) return null;
 
-    const currentDayOfWeek = getCurrentDayOfWeek();
+    const currentDayOfWeek = normalizeText(getCurrentDayOfWeek());
 
-    return businessHours.find((hour) => hour.day_of_week === currentDayOfWeek);
+    return businessHours.find((hour) => normalizeText(hour.day_of_week) === currentDayOfWeek);
   };
 
   const todayHours = getTodayHours();
