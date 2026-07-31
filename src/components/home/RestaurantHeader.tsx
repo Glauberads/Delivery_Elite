@@ -26,41 +26,52 @@ interface DeliveryTime {
 export function RestaurantHeader({ overrideSlug }: { overrideSlug?: string }) {
   const { tenantId, restaurant, isLoading: isLoadingTenant, schedule, businessHours } = usePublicTenant(overrideSlug);
   const [deliveryTimes, setDeliveryTimes] = useState<DeliveryTime[]>([]);
+  const [deliveryRegions, setDeliveryRegions] = useState<{fee: number}[]>([]);
   const [error, setError] = useState(false);
   const [isLoadingDeliveryTimes, setIsLoadingDeliveryTimes] = useState(false);
 
-  // Efeito para carregar tempos de entrega
+  // Efeito para carregar tempos de entrega e regiões
   useEffect(() => {
-    const fetchDeliveryTimes = async () => {
+    const fetchDeliveryInfo = async () => {
       if (!tenantId) {
         setDeliveryTimes([]);
+        setDeliveryRegions([]);
         return;
       }
 
       setIsLoadingDeliveryTimes(true);
 
       try {
-        const { data, error } = await supabase
-          .from("delivery_times")
-          .select("*")
-          .eq("tenant_id", tenantId)
-          .order("id");
+        const [timesResponse, regionsResponse] = await Promise.all([
+          supabase
+            .from("delivery_times")
+            .select("*")
+            .eq("tenant_id", tenantId)
+            .order("id"),
+          supabase
+            .from("delivery_regions")
+            .select("fee")
+            .eq("tenant_id", tenantId)
+        ]);
 
-        if (error) {
-          throw error;
+        if (timesResponse.error) throw timesResponse.error;
+        if (regionsResponse.error) throw regionsResponse.error;
+
+        if (timesResponse.data) {
+          setDeliveryTimes(timesResponse.data);
         }
-
-        if (data) {
-          setDeliveryTimes(data);
+        
+        if (regionsResponse.data) {
+          setDeliveryRegions(regionsResponse.data);
         }
       } catch (error) {
-        console.error("Erro ao carregar tempos de entrega:", error);
+        console.error("Erro ao carregar infos de entrega:", error);
       } finally {
         setIsLoadingDeliveryTimes(false);
       }
     };
 
-    fetchDeliveryTimes();
+    fetchDeliveryInfo();
   }, [tenantId]);
 
   useEffect(() => {
@@ -152,6 +163,26 @@ export function RestaurantHeader({ overrideSlug }: { overrideSlug?: string }) {
   };
 
   const todayHours = getTodayHours();
+
+  const getDeliveryFeeDisplay = () => {
+    if (restaurant?.delivery_fee && restaurant.delivery_fee > 0) {
+      return `R$ ${restaurant.delivery_fee.toFixed(2).replace(".", ",")}`;
+    }
+    
+    if (deliveryRegions.length > 0) {
+      const fees = deliveryRegions.map(r => r.fee);
+      const lowestFee = Math.min(...fees);
+      
+      if (lowestFee === 0) {
+        const hasPaidRegion = fees.some(f => f > 0);
+        return hasPaidRegion ? "Consultar taxa" : "Grátis";
+      }
+      
+      return `A partir de R$ ${lowestFee.toFixed(2).replace(".", ",")}`;
+    }
+    
+    return "Grátis";
+  };
 
   return (
     <div className="relative">
@@ -315,11 +346,7 @@ export function RestaurantHeader({ overrideSlug }: { overrideSlug?: string }) {
                       >
                         <span className="flex items-center gap-1">
                           <Bike className="h-4 w-4 text-delivery-500" />
-                          {restaurant?.delivery_fee && restaurant.delivery_fee > 0
-                            ? `R$ ${restaurant.delivery_fee
-                                .toFixed(2)
-                                .replace(".", ",")}`
-                            : "Grátis"}
+                          {getDeliveryFeeDisplay()}
                         </span>
                       </Badge>
                       <ThemeToggle className="h-8 w-8 rounded-full bg-background/80 backdrop-blur-sm" />
