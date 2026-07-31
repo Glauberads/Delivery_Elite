@@ -48,6 +48,15 @@ const PRESET_OPTIONS = [
     }),
   },
   {
+    value: "evening",
+    label: "Tarde/Noite (16h às 00h)",
+    build: () => ({
+      open_time: "16:00",
+      close_time: "00:00",
+      is_closed: false,
+    }),
+  },
+  {
     value: "night",
     label: "Noturno (18h às 02h)",
     build: () => ({
@@ -111,7 +120,7 @@ export function OperatingHoursForm() {
         return [];
       }
 
-      const { data, error } = await supabase.from("business_hours").select("*");
+      const { data, error } = await supabase.from("business_hours").select("*").eq("tenant_id", tenantId);
 
       if (error) {
         throw error;
@@ -136,7 +145,7 @@ export function OperatingHoursForm() {
           throw insertError;
         }
 
-        const { data: refreshedData, error: refreshError } = await supabase.from("business_hours").select("*");
+        const { data: refreshedData, error: refreshError } = await supabase.from("business_hours").select("*").eq("tenant_id", tenantId);
         if (refreshError) {
           throw refreshError;
         }
@@ -151,7 +160,7 @@ export function OperatingHoursForm() {
           throw insertError;
         }
 
-        const { data: refreshedData, error: refreshError } = await supabase.from("business_hours").select("*");
+        const { data: refreshedData, error: refreshError } = await supabase.from("business_hours").select("*").eq("tenant_id", tenantId);
         if (refreshError) {
           throw refreshError;
         }
