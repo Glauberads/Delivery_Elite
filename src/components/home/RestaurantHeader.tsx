@@ -330,7 +330,7 @@ export function RestaurantHeader({ overrideSlug }: { overrideSlug?: string }) {
             </div>
 
             <div className="mt-3 text-sm">
-              {isLoadingTenant || isLoadingBusinessHours ? (
+              {isLoadingTenant ? (
                 <Skeleton className="h-4 w-32" />
               ) : (
                 <>
