@@ -81,6 +81,29 @@ export function PrintReceiptDialog({
             .mt-3 { margin-top: 12px; }
             .space-y-1 > * + * { margin-top: 4px; }
             .space-y-2 > * + * { margin-top: 8px; }
+            
+            /* Tailwind util classes used in OrderReceipt */
+            .flex { display: flex; }
+            .inline-flex { display: inline-flex; }
+            .items-center { align-items: center; }
+            .justify-between { justify-content: space-between; }
+            .text-center { text-align: center; }
+            .text-xl { font-size: 20px; line-height: 28px; }
+            .text-xs { font-size: 10px; line-height: 14px; }
+            .font-semibold { font-weight: 600; }
+            .pl-4 { padding-left: 16px; }
+            .pt-1 { padding-top: 4px; }
+            .my-4 { margin-top: 16px; margin-bottom: 16px; }
+            .my-5 { margin-top: 20px; margin-bottom: 20px; }
+            .px-2 { padding-left: 8px; padding-right: 8px; }
+            .py-0\\.5 { padding-top: 2px; padding-bottom: 2px; }
+            .rounded-full { border-radius: 9999px; }
+            .gap-1 { gap: 4px; }
+            .w-full { width: 100%; }
+            .w-\\[300px\\] { width: 300px; }
+            .mr-1 { margin-right: 4px; }
+            .border-dashed { border-style: dashed; }
+            .leading-tight { line-height: 1.25; }
           </style>
         </head>
         <body>
