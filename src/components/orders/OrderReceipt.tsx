@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { OrderItem, OrderStatus, PaymentMethod, OrderType } from "@/types";
 import { MapPin, Package2, Users } from "lucide-react";
 import { usePaymentMethods } from "@/hooks/useOrders";
+import { useAuth } from "@/contexts/AuthContext";
 
 // Interfaces para os dados vindos do Supabase
 interface RestaurantFromDB {
@@ -102,10 +103,13 @@ interface OrderReceiptProps {
 
 export function OrderReceipt({ orderId }: OrderReceiptProps) {
   const { data: paymentMethods = [] } = usePaymentMethods();
+  const { user } = useAuth();
 
   const { data: restaurant } = useQuery({
-    queryKey: ["restaurant-info"],
+    queryKey: ["restaurant-info", user?.tenantId],
     queryFn: async () => {
+      if (!user?.tenantId) throw new Error("Tenant ID is required");
+      
       const { data, error } = await supabase
         .from("restaurants")
         .select(`
@@ -116,9 +120,13 @@ export function OrderReceipt({ orderId }: OrderReceiptProps) {
             phone
           )
         `)
-        .single();
+        .eq("tenant_id", user.tenantId)
+        .limit(1)
+        .maybeSingle();
 
       if (error) throw error;
+      if (!data) return null;
+      
       return {
         id: data.id,
         address: data.address ?? null,
@@ -126,6 +134,7 @@ export function OrderReceipt({ orderId }: OrderReceiptProps) {
         phone: data.tenant?.phone ?? null,
       } as RestaurantFromDB;
     },
+    enabled: !!user?.tenantId,
   });
 
   const { data: order } = useQuery({
