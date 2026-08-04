@@ -117,7 +117,16 @@ export function PrintReceiptDialog({
     printFrame.contentWindow?.focus();
     setTimeout(() => {
       printFrame.contentWindow?.print();
-      document.body.removeChild(printFrame);
+      
+      setTimeout(() => {
+        try {
+          if (document.body.contains(printFrame)) {
+            document.body.removeChild(printFrame);
+          }
+        } catch (e) {
+          // Ignore
+        }
+      }, 60000); // Remove after 1 minute to ensure print dialog has time to process
     }, 500);
   };
 
@@ -126,6 +135,9 @@ export function PrintReceiptDialog({
       <DialogContent className="max-w-[350px]">
         <DialogHeader>
           <DialogTitle>Imprimir Comanda</DialogTitle>
+          <div aria-describedby={undefined} className="sr-only">
+            Visualização do recibo para impressão
+          </div>
         </DialogHeader>
         <div className="bg-white rounded-lg">
           <div ref={printRef}>

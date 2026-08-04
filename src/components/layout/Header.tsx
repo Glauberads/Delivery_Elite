@@ -1,5 +1,5 @@
 import React from "react";
-import { Bell, Search } from "lucide-react";
+import { Bell, Music2, Search, Trash2, Volume2, VolumeX } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import {
   DropdownMenu,
@@ -17,6 +17,7 @@ import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { StorefrontToggle } from "@/components/ui/storefront-toggle";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
 
 interface HeaderProps {
   title: string;
@@ -33,6 +34,11 @@ export function Header({ title }: HeaderProps) {
     markAsRead,
     markAllSeen,
     clearNotifications,
+    soundEnabled,
+    enableNotificationSound,
+    customSoundName,
+    saveCustomNotificationSound,
+    clearCustomNotificationSound,
   } = useNotifications(notificationsEnabled, user?.id ?? "anonymous");
   
   // Log para debug das notificações
@@ -45,6 +51,23 @@ export function Header({ title }: HeaderProps) {
     navigate(`/orders?orderId=${notificationId}`);
   };
 
+  const handleCustomSoundChange = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file) return;
+
+    try {
+      await saveCustomNotificationSound(file);
+      toast.success("Áudio de novos pedidos atualizado.");
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "Não foi possível salvar o áudio."
+      );
+    }
+  };
+
   return (
     <div className="border-b">
       <div className="flex h-16 items-center px-4 md:px-6">
@@ -52,6 +75,27 @@ export function Header({ title }: HeaderProps) {
         <div className="ml-auto flex items-center gap-4">
           <ThemeToggle />
           <StorefrontToggle />
+          {notificationsEnabled ? (
+            <Button
+              variant="outline"
+              size="icon"
+              title={soundEnabled ? "Testar som de novos pedidos" : "Ativar som de novos pedidos"}
+              aria-label={soundEnabled ? "Testar som de novos pedidos" : "Ativar som de novos pedidos"}
+              className={cn(
+                "relative transition-colors",
+                soundEnabled
+                  ? "text-emerald-600 dark:text-emerald-400"
+                  : "text-amber-600 dark:text-amber-400"
+              )}
+              onClick={() => void enableNotificationSound()}
+            >
+              {soundEnabled ? (
+                <Volume2 className="h-4 w-4" />
+              ) : (
+                <VolumeX className="h-4 w-4" />
+              )}
+            </Button>
+          ) : null}
           {notificationsEnabled ? (
             <DropdownMenu onOpenChange={(open) => open && markAllSeen()}>
               <DropdownMenuTrigger asChild>
@@ -74,6 +118,32 @@ export function Header({ title }: HeaderProps) {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-80">
                 <DropdownMenuLabel>Notificações</DropdownMenuLabel>
+                <div className="space-y-2 px-2 pb-2">
+                  <label className="flex cursor-pointer items-center gap-2 rounded-md border border-border px-3 py-2 text-sm hover:bg-accent">
+                    <Music2 className="h-4 w-4" />
+                    <span className="min-w-0 flex-1 truncate">
+                      {customSoundName || "Escolher outro áudio"}
+                    </span>
+                    <input
+                      type="file"
+                      accept="audio/*"
+                      className="hidden"
+                      onChange={handleCustomSoundChange}
+                    />
+                  </label>
+                  {customSoundName ? (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="h-8 w-full justify-start text-muted-foreground"
+                      onClick={clearCustomNotificationSound}
+                    >
+                      <Trash2 className="mr-2 h-4 w-4" />
+                      Usar bipe padrão
+                    </Button>
+                  ) : null}
+                </div>
                 <DropdownMenuSeparator />
                 {notifications.length === 0 ? (
                   <DropdownMenuItem disabled>

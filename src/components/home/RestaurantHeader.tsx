@@ -26,7 +26,7 @@ interface DeliveryTime {
 export function RestaurantHeader({ overrideSlug }: { overrideSlug?: string }) {
   const { tenantId, restaurant, isLoading: isLoadingTenant, schedule, businessHours } = usePublicTenant(overrideSlug);
   const [deliveryTimes, setDeliveryTimes] = useState<DeliveryTime[]>([]);
-  const [deliveryRegions, setDeliveryRegions] = useState<{fee: number}[]>([]);
+  const [deliveryRegions, setDeliveryRegions] = useState<{ fee: number }[]>([]);
   const [error, setError] = useState(false);
   const [isLoadingDeliveryTimes, setIsLoadingDeliveryTimes] = useState(false);
 
@@ -60,7 +60,7 @@ export function RestaurantHeader({ overrideSlug }: { overrideSlug?: string }) {
         if (timesResponse.data) {
           setDeliveryTimes(timesResponse.data);
         }
-        
+
         if (regionsResponse.data) {
           setDeliveryRegions(regionsResponse.data);
         }
@@ -168,19 +168,19 @@ export function RestaurantHeader({ overrideSlug }: { overrideSlug?: string }) {
     if (restaurant?.delivery_fee && restaurant.delivery_fee > 0) {
       return `R$ ${restaurant.delivery_fee.toFixed(2).replace(".", ",")}`;
     }
-    
+
     if (deliveryRegions.length > 0) {
       const fees = deliveryRegions.map(r => r.fee);
       const lowestFee = Math.min(...fees);
-      
+
       if (lowestFee === 0) {
         const hasPaidRegion = fees.some(f => f > 0);
         return hasPaidRegion ? "Consultar taxa" : "Grátis";
       }
-      
+
       return `A partir de R$ ${lowestFee.toFixed(2).replace(".", ",")}`;
     }
-    
+
     return "Grátis";
   };
 
@@ -336,9 +336,8 @@ export function RestaurantHeader({ overrideSlug }: { overrideSlug?: string }) {
                         className="flex items-center gap-1"
                       >
                         <Clock className="h-3.5 w-3.5" />
-                        <span>{`${getCurrentDeliveryTime().min}-${
-                          getCurrentDeliveryTime().max
-                        } minutos`}</span>
+                        <span>{`${getCurrentDeliveryTime().min}-${getCurrentDeliveryTime().max
+                          } minutos`}</span>
                       </Badge>
                       <Badge
                         variant="outline"

@@ -124,6 +124,19 @@ interface PaymentMethod {
   description?: string;
 }
 
+interface DeliveryRegion {
+  id: string;
+  name: string;
+  fee: number;
+}
+
+const normalizeNeighborhood = (value?: string) =>
+  (value ?? "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-zA-Z0-9]/g, "")
+    .toLowerCase();
+
 // Adicionar novo tipo para as etapas do carrinho
 type CartStep = "cart" | "order-type" | "checkout" | "confirmation";
 
@@ -280,6 +293,8 @@ export function FloatingCart({
   const [orderTime, setOrderTime] = useState("");
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
   const [isLoadingPaymentMethods, setIsLoadingPaymentMethods] = useState(false);
+  const [deliveryRegions, setDeliveryRegions] = useState<DeliveryRegion[]>([]);
+  const [isLoadingDeliveryRegions, setIsLoadingDeliveryRegions] = useState(false);
   const [businessHours, setBusinessHours] = useState<BusinessHour[]>([]);
   const [isLoadingBusinessHours, setIsLoadingBusinessHours] = useState(false);
   const queryClient = useQueryClient();
@@ -319,16 +334,6 @@ export function FloatingCart({
     }
   }, [onOpenChange, orderingBlocked]);
 
-  // Valor padrão para taxa de entrega, será substituído pelos dados do restaurante quando carregados
-  const deliveryFee = restaurant?.delivery_fee ?? 5.0;
-  // A taxa de entrega só deve ser aplicada quando tivermos um tipo de pedido definido como delivery
-  // No carrinho inicial, não devemos mostrar nem aplicar a taxa
-  const finalTotal =
-    cartStep === "cart"
-      ? totalPrice
-      : totalPrice +
-        (totalItems > 0 && orderType === "delivery" ? deliveryFee : 0);
-
   // Inicializar o formulário
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -348,6 +353,21 @@ export function FloatingCart({
       notes: "",
     },
   });
+
+  const neighborhood = form.watch("neighborhood") ?? "";
+  const selectedDeliveryRegion = deliveryRegions.find(
+    (region) =>
+      normalizeNeighborhood(region.name) === normalizeNeighborhood(neighborhood)
+  );
+  const deliveryFee =
+    orderType === "delivery" && selectedDeliveryRegion
+      ? Number(selectedDeliveryRegion.fee)
+      : 0;
+  const finalTotal =
+    cartStep === "cart"
+      ? totalPrice
+      : totalPrice +
+        (totalItems > 0 && orderType === "delivery" ? deliveryFee : 0);
 
   // Efeito para carregar métodos de pagamento
   useEffect(() => {
@@ -393,6 +413,38 @@ export function FloatingCart({
 
     fetchPaymentMethods();
   }, [form, tenantId]);
+
+  useEffect(() => {
+    const fetchDeliveryRegions = async () => {
+      if (!tenantId) {
+        setDeliveryRegions([]);
+        return;
+      }
+
+      setIsLoadingDeliveryRegions(true);
+      try {
+        const { data, error } = await supabase
+          .from("delivery_regions")
+          .select("id, name, fee")
+          .eq("tenant_id", tenantId)
+          .order("name");
+
+        if (error) throw error;
+        setDeliveryRegions((data ?? []).map((region) => ({
+          ...region,
+          fee: Number(region.fee),
+        })));
+      } catch (error) {
+        console.error("Erro ao carregar regiões de entrega:", error);
+        setDeliveryRegions([]);
+        toast.error("Não foi possível consultar as regiões de entrega.");
+      } finally {
+        setIsLoadingDeliveryRegions(false);
+      }
+    };
+
+    void fetchDeliveryRegions();
+  }, [tenantId]);
 
   // Efeito para carregar horários de funcionamento
   useEffect(() => {
@@ -501,16 +553,33 @@ export function FloatingCart({
         return sum + totalItemPrice;
       }, 0);
 
-      // Calculate delivery fee based on orderType - only apply for delivery orders
+      const matchedDeliveryRegion = deliveryRegions.find(
+        (region) =>
+          normalizeNeighborhood(region.name) ===
+          normalizeNeighborhood(data.neighborhood)
+      );
+
+      if (data.orderType === "delivery" && !matchedDeliveryRegion) {
+        const message = data.neighborhood
+          ? `Não realizamos entregas no bairro ${data.neighborhood}.`
+          : "Informe o bairro para verificar a disponibilidade da entrega.";
+        form.setError("neighborhood", { type: "validate", message });
+        toast.error(message);
+        return;
+      }
+
       const deliveryFee =
-        data.orderType === "delivery" ? restaurant?.delivery_fee ?? 5.0 : 0;
+        data.orderType === "delivery" && matchedDeliveryRegion
+          ? Number(matchedDeliveryRegion.fee)
+          : 0;
 
       // Calculate total
       const total = subtotal + deliveryFee;
 
       // Format delivery address if applicable
       let deliveryAddress = null;
-      const deliveryRegionId = null;
+      const deliveryRegionId =
+        data.orderType === "delivery" ? matchedDeliveryRegion?.id ?? null : null;
 
       if (data.orderType === "delivery") {
         // Format address
@@ -592,10 +661,13 @@ export function FloatingCart({
         // Preço total do item (incluindo quantidade)
         const totalItemPrice = unitPriceWithAddons * item.quantity;
 
+        const orderItemId = crypto.randomUUID();
+
         // Insert order item
-        const { data: orderItem, error: itemError } = await supabase
+        const { error: itemError } = await supabase
           .from("order_items")
           .insert({
+            id: orderItemId,
             tenant_id: tenantId,
             order_id: orderId,
             product_id: item.product.id,
@@ -603,9 +675,7 @@ export function FloatingCart({
             unit_price: Number(unitPriceWithAddons.toFixed(2)),
             total_price: Number(totalItemPrice.toFixed(2)),
             notes: item.notes || null,
-          })
-          .select()
-          .single();
+          });
 
         if (itemError) {
           throw new Error(`[order_items] ${itemError.message}`);
@@ -623,7 +693,7 @@ export function FloatingCart({
             })
             .map((addon) => ({
               tenant_id: tenantId,
-              order_item_id: orderItem.id,
+              order_item_id: orderItemId,
               addon_id: addon.id,
               quantity: addon.quantity || 1,
               unit_price: Number(addon.price.toFixed(2)),
@@ -823,6 +893,14 @@ export function FloatingCart({
       // (que já foram limpos após a confirmação)
       const itemsToUse = orderItems.length > 0 ? orderItems : cartItems;
       const subtotalToUse = orderSubtotal > 0 ? orderSubtotal : totalPrice;
+      const confirmedDeliveryRegion = deliveryRegions.find(
+        (region) =>
+          normalizeNeighborhood(region.name) ===
+          normalizeNeighborhood(formData.neighborhood)
+      );
+      const confirmedDeliveryFee = confirmedDeliveryRegion
+        ? Number(confirmedDeliveryRegion.fee)
+        : 0;
 
       // Dados para a mensagem
       const orderInfo = {
@@ -837,11 +915,12 @@ export function FloatingCart({
               }, ${formData.neighborhood || ""}, ${formData.zipCode || ""}`
             : "N/A",
         paymentMethod: paymentMethodName,
-        deliveryFee: formData.orderType === "delivery" ? deliveryFee : 0,
+        deliveryFee:
+          formData.orderType === "delivery" ? confirmedDeliveryFee : 0,
         subtotal: subtotalToUse,
         totalPrice:
           formData.orderType === "delivery"
-            ? subtotalToUse + deliveryFee
+            ? subtotalToUse + confirmedDeliveryFee
             : subtotalToUse,
         items: itemsToUse.map((item) => {
           // Calcular valor do item com adicionais
@@ -1392,7 +1471,11 @@ export function FloatingCart({
                         <span className="text-muted-foreground">
                           Taxa de entrega
                         </span>
-                        <span>{formatCurrency(deliveryFee)}</span>
+                        <span>
+                          {selectedDeliveryRegion
+                            ? formatCurrency(deliveryFee)
+                            : "A calcular"}
+                        </span>
                       </div>
                     )}
                     <div className="flex justify-between font-bold pt-2 border-t">
@@ -1661,9 +1744,24 @@ export function FloatingCart({
                               <Input
                                 placeholder="Nome do bairro"
                                 {...field}
+                                onChange={(event) => {
+                                  field.onChange(event);
+                                  form.clearErrors("neighborhood");
+                                }}
                                 disabled={isSubmitting || isLoadingCep}
                               />
                             </FormControl>
+                            {neighborhood.trim() && !isLoadingDeliveryRegions ? (
+                              selectedDeliveryRegion ? (
+                                <p className="text-sm font-medium text-emerald-600 dark:text-emerald-400">
+                                  Entrega disponível — taxa de {formatCurrency(deliveryFee)}
+                                </p>
+                              ) : (
+                                <p className="text-sm font-medium text-destructive">
+                                  Não realizamos entregas neste bairro.
+                                </p>
+                              )
+                            ) : null}
                             <FormMessage />
                           </FormItem>
                         )}
@@ -1789,7 +1887,21 @@ export function FloatingCart({
                     <span className="text-muted-foreground">
                       Taxa de entrega
                     </span>
-                    <span>{formatCurrency(deliveryFee)}</span>
+                    <span
+                      className={cn(
+                        neighborhood.trim() && !selectedDeliveryRegion
+                          ? "font-medium text-destructive"
+                          : undefined
+                      )}
+                    >
+                      {isLoadingDeliveryRegions
+                        ? "Consultando..."
+                        : !neighborhood.trim()
+                        ? "Informe o bairro"
+                        : selectedDeliveryRegion
+                        ? formatCurrency(deliveryFee)
+                        : "Região não atendida"}
+                    </span>
                   </div>
                 )}
                 <div className="flex justify-between font-bold pt-2 border-t">
@@ -1814,7 +1926,12 @@ export function FloatingCart({
                 <Button
                   className="flex-1 bg-delivery-500 hover:bg-delivery-600"
                   onClick={handleCheckoutComplete}
-                  disabled={isSubmitting || orderingBlocked}
+                  disabled={
+                    isSubmitting ||
+                    orderingBlocked ||
+                    (orderType === "delivery" &&
+                      (isLoadingDeliveryRegions || !selectedDeliveryRegion))
+                  }
                 >
                   {isSubmitting ? (
                     <span className="flex items-center gap-2">

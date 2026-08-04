@@ -1,5 +1,5 @@
 import React from "react";
-import { Bell, Search } from "lucide-react";
+import { Bell, Search, Volume2, VolumeX } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import {
   DropdownMenu,
@@ -32,6 +32,8 @@ export function Header({ title }: HeaderProps) {
     markAsRead,
     markAllSeen,
     clearNotifications,
+    soundEnabled,
+    enableNotificationSound,
   } = useNotifications(notificationsEnabled, user?.id ?? "anonymous");
   
   // Log para debug das notificações
@@ -52,6 +54,27 @@ export function Header({ title }: HeaderProps) {
           <h1 className="text-lg font-semibold text-slate-900 md:text-xl dark:text-slate-50">{title}</h1>
           <div className="ml-auto flex items-center gap-4">
             <ThemeToggle />
+            {notificationsEnabled ? (
+              <Button
+                variant="outline"
+                size="icon"
+                title={soundEnabled ? "Testar som de novos pedidos" : "Ativar som de novos pedidos"}
+                aria-label={soundEnabled ? "Testar som de novos pedidos" : "Ativar som de novos pedidos"}
+                className={cn(
+                  "relative border-slate-200/80 bg-white/80 shadow-sm backdrop-blur-sm dark:border-zinc-800 dark:bg-slate-950/80",
+                  soundEnabled
+                    ? "text-emerald-600 dark:text-emerald-400"
+                    : "text-amber-600 dark:text-amber-400"
+                )}
+                onClick={() => void enableNotificationSound()}
+              >
+                {soundEnabled ? (
+                  <Volume2 className="h-4 w-4" />
+                ) : (
+                  <VolumeX className="h-4 w-4" />
+                )}
+              </Button>
+            ) : null}
             {notificationsEnabled ? (
               <DropdownMenu onOpenChange={(open) => open && markAllSeen()}>
                 <DropdownMenuTrigger asChild>

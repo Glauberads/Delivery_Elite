@@ -21,7 +21,7 @@ export default function TrackOrder() {
 
   if (!orderId) {
     return (
-      <div className="min-h-screen bg-gray-50 py-8 flex flex-col items-center justify-center">
+      <div className="min-h-screen bg-background text-foreground py-8 flex flex-col items-center justify-center">
         <div className="max-w-md text-center p-6">
           <h1 className="text-2xl font-bold mb-4">Erro ao rastrear pedido</h1>
           <p className="text-muted-foreground mb-6">
@@ -35,7 +35,7 @@ export default function TrackOrder() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-background text-foreground py-8">
       <OrderTracker />
     </div>
   );

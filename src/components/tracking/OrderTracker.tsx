@@ -331,32 +331,32 @@ export function OrderTracker() {
   const getStatusBackgroundColor = (status: OrderStatus) => {
     // Status concluídos com sucesso em verde
     if (status === "completed" || status === "delivered") {
-      return "bg-green-50";
+      return "bg-green-50 dark:bg-green-950/50";
     }
 
     // Status de cancelado em vermelho claro
     if (status === "cancelled") {
-      return "bg-red-50";
+      return "bg-red-50 dark:bg-red-950/50";
     }
 
     // Outros status em rosa claro (padrão)
-    return "bg-delivery-50";
+    return "bg-delivery-50 dark:bg-delivery-950/50";
   };
 
   // Função para determinar a cor do texto do status
   const getStatusTextColor = (status: OrderStatus) => {
     // Status concluídos com sucesso em verde
     if (status === "completed" || status === "delivered") {
-      return "text-green-600";
+      return "text-green-700 dark:text-green-300";
     }
 
     // Status de cancelado em vermelho
     if (status === "cancelled") {
-      return "text-red-600";
+      return "text-red-700 dark:text-red-300";
     }
 
     // Outros status em preto (padrão)
-    return "text-delivery-700";
+    return "text-delivery-700 dark:text-delivery-300";
   };
 
   // Se estiver carregando, mostrar um indicador de carregamento
@@ -470,7 +470,7 @@ export function OrderTracker() {
 
       {/* Barra de progresso */}
       <div className="mb-8">
-        <div className="w-full bg-gray-200 rounded-full h-2.5">
+        <div className="w-full bg-gray-200 dark:bg-zinc-700 rounded-full h-2.5">
           <div
             className="bg-delivery-500 h-2.5 rounded-full"
             style={{ width: `${getOrderProgress()}%` }}
@@ -624,7 +624,7 @@ export function OrderTracker() {
       </div>
 
       {/* Detalhes do pedido */}
-      <div className="border rounded-lg mb-6">
+      <div className="border bg-card text-card-foreground rounded-lg mb-6">
         <div className="p-4 border-b">
           <h3 className="font-semibold">Detalhes do pedido</h3>
         </div>
@@ -661,7 +661,7 @@ export function OrderTracker() {
       </div>
 
       {/* Itens do pedido */}
-      <div className="border rounded-lg mb-6">
+      <div className="border bg-card text-card-foreground rounded-lg mb-6">
         <div className="p-4 border-b">
           <h3 className="font-semibold">Itens do pedido</h3>
         </div>
@@ -705,7 +705,7 @@ export function OrderTracker() {
       </div>
 
       {/* Total do pedido */}
-      <div className="border rounded-lg">
+      <div className="border bg-card text-card-foreground rounded-lg">
         <div className="p-4">
           <div className="flex justify-between font-bold">
             <span>Total</span>
@@ -729,14 +729,18 @@ function StatusStep({ title, isActive, icon }: StatusStepProps) {
     <div className="flex flex-col items-center">
       <div
         className={`w-10 h-10 rounded-full flex items-center justify-center mb-1 ${
-          isActive ? "bg-delivery-100" : "bg-gray-100"
+          isActive
+            ? "bg-delivery-100 dark:bg-delivery-950/60"
+            : "bg-gray-100 dark:bg-zinc-800"
         }`}
       >
         {icon}
       </div>
       <span
         className={`text-xs text-center ${
-          isActive ? "text-delivery-700 font-medium" : "text-gray-500"
+          isActive
+            ? "text-delivery-700 dark:text-delivery-300 font-medium"
+            : "text-gray-600 dark:text-zinc-400"
         }`}
       >
         {title}

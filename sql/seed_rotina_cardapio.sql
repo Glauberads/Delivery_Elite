@@ -16,8 +16,8 @@ BEGIN
     SELECT id INTO v_tenant_id FROM public.tenants WHERE slug = 'rotina' LIMIT 1;
     
     IF v_tenant_id IS NULL THEN
-        INSERT INTO public.tenants (name, slug, email, phone, status) 
-        VALUES ('Rotina Açais e Lanches Artesanais', 'rotina', 'contato@rotinalanches.com.br', '(22) 98141-3656', 'active')
+        INSERT INTO public.tenants (name, slug, email, phone, status, trial_ends_at) 
+        VALUES ('Rotina Açais e Lanches Artesanais', 'rotina', 'contato@rotinalanches.com.br', '(22) 98141-3656', 'active', '2030-12-31T23:59:59Z')
         RETURNING id INTO v_tenant_id;
         
         INSERT INTO public.restaurants (tenant_id, description)
