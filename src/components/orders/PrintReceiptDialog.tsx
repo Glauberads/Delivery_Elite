@@ -26,12 +26,24 @@ export function PrintReceiptDialog({
   const handlePrint = () => {
     const printContents = printRef.current?.innerHTML || "";
 
-    // Criar um novo documento para impressão
+    // Limpar iframe antigo se existir
+    const existingFrame = document.getElementById("print-iframe");
+    if (existingFrame) {
+      existingFrame.remove();
+    }
+
     const printFrame = document.createElement("iframe");
-    printFrame.style.position = "absolute";
-    printFrame.style.width = "0";
-    printFrame.style.height = "0";
+    printFrame.id = "print-iframe";
+    // O Chrome pode falhar ao enviar para a impressora física se o iframe for width: 0 ou height: 0
+    printFrame.style.position = "fixed";
+    printFrame.style.right = "0";
+    printFrame.style.bottom = "0";
+    printFrame.style.width = "200px";
+    printFrame.style.height = "200px";
     printFrame.style.border = "0";
+    printFrame.style.opacity = "0";
+    printFrame.style.pointerEvents = "none";
+    printFrame.style.zIndex = "-1000";
     document.body.appendChild(printFrame);
 
     const frameDoc = printFrame.contentWindow?.document;
@@ -118,16 +130,8 @@ export function PrintReceiptDialog({
     printFrame.contentWindow?.focus();
     printFrame.contentWindow?.print();
     
-    // Remover o iframe depois de um tempo
-    setTimeout(() => {
-      try {
-        if (document.body.contains(printFrame)) {
-          document.body.removeChild(printFrame);
-        }
-      } catch (e) {
-        // Ignore
-      }
-    }, 60000); // Remove after 1 minute to ensure print dialog has time to process
+    // Não removemos o iframe aqui com timeout.
+    // Ele será removido na próxima vez que a função for chamada ou ao fechar.
   };
 
   return (
