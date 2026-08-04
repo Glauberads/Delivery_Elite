@@ -4,6 +4,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { OrderReceipt } from "./OrderReceipt";
@@ -113,21 +114,20 @@ export function PrintReceiptDialog({
     `);
     frameDoc.close();
 
-    // Executar a impressão
+    // Executar a impressão sincronicamente para evitar bloqueio de popups
     printFrame.contentWindow?.focus();
+    printFrame.contentWindow?.print();
+    
+    // Remover o iframe depois de um tempo
     setTimeout(() => {
-      printFrame.contentWindow?.print();
-      
-      setTimeout(() => {
-        try {
-          if (document.body.contains(printFrame)) {
-            document.body.removeChild(printFrame);
-          }
-        } catch (e) {
-          // Ignore
+      try {
+        if (document.body.contains(printFrame)) {
+          document.body.removeChild(printFrame);
         }
-      }, 60000); // Remove after 1 minute to ensure print dialog has time to process
-    }, 500);
+      } catch (e) {
+        // Ignore
+      }
+    }, 60000); // Remove after 1 minute to ensure print dialog has time to process
   };
 
   return (
@@ -135,9 +135,9 @@ export function PrintReceiptDialog({
       <DialogContent className="max-w-[350px]">
         <DialogHeader>
           <DialogTitle>Imprimir Comanda</DialogTitle>
-          <div aria-describedby={undefined} className="sr-only">
+          <DialogDescription className="sr-only">
             Visualização do recibo para impressão
-          </div>
+          </DialogDescription>
         </DialogHeader>
         <div className="bg-white rounded-lg">
           <div ref={printRef}>
