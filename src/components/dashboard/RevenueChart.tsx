@@ -9,14 +9,19 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { subDays, format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { useAuth } from '@/contexts/AuthContext';
 
 export function RevenueChart() {
+  const { user } = useAuth();
+
   const { data } = useQuery({
-    queryKey: ['daily-revenue'],
+    queryKey: ['daily-revenue', user?.tenantId],
+    enabled: !!user?.tenantId,
     queryFn: async () => {
       const { data, error } = await supabase
         .from('orders')
         .select('created_at, total')
+        .eq('tenant_id', user?.tenantId)
         .gte('created_at', subDays(new Date(), 7).toISOString())
         .order('created_at', { ascending: true });
 

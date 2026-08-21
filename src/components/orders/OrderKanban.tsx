@@ -1,6 +1,7 @@
 import React from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -87,13 +88,16 @@ export function OrderKanban({ onUpdateOrderStatus }: OrderKanbanProps) {
   const [printOrderId, setPrintOrderId] = React.useState<string | null>(null);
   const [viewOrderId, setViewOrderId] = React.useState<string | null>(null);
   const { data: paymentMethods = [] } = usePaymentMethods();
+  const { user } = useAuth();
 
   const { data: orders = [], isLoading } = useQuery({
-    queryKey: ["kanban-orders"],
+    queryKey: ["kanban-orders", user?.tenantId],
+    enabled: !!user?.tenantId,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("orders")
         .select("*")
+        .eq("tenant_id", user?.tenantId)
         .in("status", ["pending", "preparing", "ready"])
         .not("number", "like", "DELETED_%")
         .order("created_at", { ascending: true });
