@@ -32,11 +32,13 @@ export function RegionSettings() {
   const queryClient = useQueryClient();
 
   const { data: regions = [] } = useQuery({
-    queryKey: ['delivery-regions'],
+    queryKey: ['delivery-regions', user?.tenantId],
+    enabled: !!user?.tenantId,
     queryFn: async () => {
       const { data, error } = await supabase
         .from('delivery_regions')
         .select('*')
+        .eq('tenant_id', user?.tenantId)
         .order('name');
       
       if (error) throw error;

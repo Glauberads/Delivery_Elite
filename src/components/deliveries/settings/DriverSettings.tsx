@@ -35,11 +35,13 @@ export function DriverSettings() {
   const queryClient = useQueryClient();
 
   const { data: drivers = [] } = useQuery({
-    queryKey: ['drivers'],
+    queryKey: ['drivers', user?.tenantId],
+    enabled: !!user?.tenantId,
     queryFn: async () => {
       const { data, error } = await supabase
         .from('drivers')
         .select('*')
+        .eq('tenant_id', user?.tenantId)
         .order('name');
       
       if (error) throw error;
