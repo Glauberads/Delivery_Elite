@@ -15,14 +15,19 @@ import { OrderStatus } from "@/types";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
+import { useAuth } from "@/contexts/AuthContext";
 
 export function RecentOrders() {
+  const { user } = useAuth();
+
   const { data: orders } = useQuery({
-    queryKey: ["recent-orders"],
+    queryKey: ["recent-orders", user?.tenantId],
+    enabled: !!user?.tenantId,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("orders")
         .select("*")
+        .eq("tenant_id", user?.tenantId)
         .order("created_at", { ascending: false })
         .limit(5);
 

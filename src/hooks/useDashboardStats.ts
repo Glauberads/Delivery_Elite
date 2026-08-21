@@ -2,18 +2,22 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { format, subDays } from 'date-fns';
+import { useAuth } from '@/contexts/AuthContext';
 
 export function useDashboardStats() {
   const sevenDaysAgo = subDays(new Date(), 7);
   const previousSevenDaysAgo = subDays(sevenDaysAgo, 7);
+  const { user } = useAuth();
 
   return useQuery({
-    queryKey: ['dashboard-stats'],
+    queryKey: ['dashboard-stats', user?.tenantId],
+    enabled: !!user?.tenantId,
     queryFn: async () => {
       // Get orders from last 7 days
       const { data: currentOrders, error: currentError } = await supabase
         .from('orders')
         .select('*')
+        .eq('tenant_id', user?.tenantId)
         .gte('created_at', sevenDaysAgo.toISOString())
         .order('created_at', { ascending: false });
 
@@ -23,6 +27,7 @@ export function useDashboardStats() {
       const { data: previousOrders, error: previousError } = await supabase
         .from('orders')
         .select('*')
+        .eq('tenant_id', user?.tenantId)
         .gte('created_at', previousSevenDaysAgo.toISOString())
         .lt('created_at', sevenDaysAgo.toISOString());
 

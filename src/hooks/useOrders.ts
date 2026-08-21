@@ -7,6 +7,7 @@ import {
   OrderStatus,
   PaymentStatus,
 } from "@/types";
+import { useAuth } from "@/contexts/AuthContext";
 
 // Define database schema types
 interface ProductFromDB {
@@ -146,8 +147,11 @@ function mapOrderFromDB(order: OrderFromDB): Order {
 }
 
 export function useOrders() {
+  const { user } = useAuth();
+
   return useQuery({
-    queryKey: ["orders"],
+    queryKey: ["orders", user?.tenantId],
+    enabled: !!user?.tenantId,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("orders")
@@ -164,6 +168,7 @@ export function useOrders() {
           )
         `
         )
+        .eq("tenant_id", user?.tenantId)
         .order("created_at", { ascending: false });
 
       if (error) {
@@ -197,13 +202,17 @@ export function usePaginatedOrders({
   searchQuery = "",
   statusFilter = "all"
 }: PaginatedOrdersParams = {}) {
+  const { user } = useAuth();
+
   return useQuery({
-    queryKey: ["orders", "paginated", page, limit, searchQuery, statusFilter],
+    queryKey: ["orders", "paginated", page, limit, searchQuery, statusFilter, user?.tenantId],
+    enabled: !!user?.tenantId,
     queryFn: async (): Promise<PaginatedOrdersResult> => {
       // Primeiro, vamos buscar o total de registros para calcular a paginação
       let countQuery = supabase
         .from("orders")
-        .select("*", { count: "exact", head: true });
+        .select("*", { count: "exact", head: true })
+        .eq("tenant_id", user?.tenantId);
 
       // Aplicar filtros na contagem
       if (searchQuery) {
@@ -242,6 +251,7 @@ export function usePaginatedOrders({
           )
         `
         )
+        .eq("tenant_id", user?.tenantId)
         .order("created_at", { ascending: false })
         .range(offset, offset + limit - 1);
 

@@ -8,14 +8,19 @@ import { TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { subDays } from 'date-fns';
+import { useAuth } from '@/contexts/AuthContext';
 
 export function OrderStatusChart() {
+  const { user } = useAuth();
+
   const { data: orders } = useQuery({
-    queryKey: ['orders-by-status'],
+    queryKey: ['orders-by-status', user?.tenantId],
+    enabled: !!user?.tenantId,
     queryFn: async () => {
       const { data, error } = await supabase
         .from('orders')
         .select('status')
+        .eq('tenant_id', user?.tenantId)
         .gte('created_at', subDays(new Date(), 7).toISOString());
 
       if (error) throw error;

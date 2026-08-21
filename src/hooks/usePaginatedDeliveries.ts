@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface UsePaginatedDeliveriesParams {
   page: number;
@@ -26,14 +27,17 @@ export function usePaginatedDeliveries({
   searchQuery = ''
 }: UsePaginatedDeliveriesParams): PaginatedDeliveriesResult {
   const offset = (page - 1) * limit;
+  const { user } = useAuth();
 
   // Query para contar o total de registros
   const { data: totalCount = 0 } = useQuery({
-    queryKey: ['deliveries-count', status, searchQuery],
+    queryKey: ['deliveries-count', status, searchQuery, user?.tenantId],
+    enabled: !!user?.tenantId,
     queryFn: async () => {
       let query = supabase
         .from('orders')
-        .select('*', { count: 'exact', head: true });
+        .select('*', { count: 'exact', head: true })
+        .eq('tenant_id', user?.tenantId);
 
       // Filtrar por status de entrega
       if (status === 'active') {
@@ -56,7 +60,8 @@ export function usePaginatedDeliveries({
 
   // Query para buscar os dados paginados
   const { data: deliveries = [], isLoading, error } = useQuery({
-    queryKey: ['deliveries-paginated', page, limit, status, searchQuery],
+    queryKey: ['deliveries-paginated', page, limit, status, searchQuery, user?.tenantId],
+    enabled: !!user?.tenantId,
     queryFn: async () => {
       let query = supabase
         .from('orders')
@@ -64,7 +69,8 @@ export function usePaginatedDeliveries({
           *,
           driver:delivery_driver_id(id, name, status, vehicle),
           region:delivery_region_id(name, fee)
-        `);
+        `)
+        .eq('tenant_id', user?.tenantId);
 
       // Filtrar por status de entrega
       if (status === 'active') {
@@ -113,12 +119,16 @@ export function usePaginatedDeliveries({
 
 // Hook para buscar dados auxiliares (motoristas e regiões)
 export function useDeliveryData() {
+  const { user } = useAuth();
+
   const { data: availableDrivers = [] } = useQuery({
-    queryKey: ['available-drivers'],
+    queryKey: ['available-drivers', user?.tenantId],
+    enabled: !!user?.tenantId,
     queryFn: async () => {
       const { data, error } = await supabase
         .from('drivers')
         .select('*')
+        .eq('tenant_id', user?.tenantId)
         .not('status', 'eq', 'Em Entrega')
         .order('name');
       
@@ -128,11 +138,13 @@ export function useDeliveryData() {
   });
 
   const { data: regions = [] } = useQuery({
-    queryKey: ['delivery-regions'],
+    queryKey: ['delivery-regions', user?.tenantId],
+    enabled: !!user?.tenantId,
     queryFn: async () => {
       const { data, error } = await supabase
         .from('delivery_regions')
         .select('*')
+        .eq('tenant_id', user?.tenantId)
         .order('name');
       
       if (error) throw error;
