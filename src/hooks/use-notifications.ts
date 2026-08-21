@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
+import { useAuth } from "@/contexts/AuthContext";
 
 type Order = Database["public"]["Tables"]["orders"]["Row"];
 
@@ -21,6 +22,7 @@ const CUSTOM_SOUND_NAME_STORAGE_KEY = "deliverypro:custom-notification-sound-nam
 const MAX_CUSTOM_SOUND_SIZE = 2 * 1024 * 1024;
 
 export function useNotifications(enabled = true, scopeKey = "global") {
+  const { user } = useAuth();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [hasUnseen, setHasUnseen] = useState(false);
   const [dismissedNotificationIds, setDismissedNotificationIds] = useState<
@@ -288,9 +290,12 @@ export function useNotifications(enabled = true, scopeKey = "global") {
     // Carregar pedidos pendentes do Supabase
     const loadPendingOrders = async () => {
       console.log('Loading pending orders for notifications...');
+      if (!user?.tenantId) return;
+
       const { data: orders, error } = await supabase
         .from("orders")
         .select("*")
+        .eq("tenant_id", user?.tenantId)
         .eq("status", "pending")
         .order("created_at", { ascending: false });
 
@@ -339,6 +344,7 @@ export function useNotifications(enabled = true, scopeKey = "global") {
         { event: "INSERT", schema: "public", table: "orders" },
         (payload) => {
           const newOrder = payload.new as Order;
+          if (newOrder.tenant_id !== user?.tenantId) return;
           console.log('New order received:', newOrder);
           if (
             newOrder.status === "pending" &&
@@ -355,6 +361,7 @@ export function useNotifications(enabled = true, scopeKey = "global") {
         { event: "UPDATE", schema: "public", table: "orders" },
         (payload) => {
           const updatedOrder = payload.new as Order;
+          if (updatedOrder.tenant_id !== user?.tenantId) return;
           const oldOrder = payload.old as Partial<Order>;
           console.log('Order updated:', { old: oldOrder, new: updatedOrder });
 

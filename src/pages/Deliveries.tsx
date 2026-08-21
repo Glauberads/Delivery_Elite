@@ -10,16 +10,21 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { CalendarDays, CheckCircle, DollarSign, Users } from 'lucide-react';
 import { startOfDay } from 'date-fns';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function Deliveries() {
+  const { user } = useAuth();
+
   // Fetch deliveries for today
   const { data: todayDeliveries = 0 } = useQuery({
-    queryKey: ['today-deliveries'],
+    queryKey: ['today-deliveries', user?.tenantId],
+    enabled: !!user?.tenantId,
     queryFn: async () => {
       const startOfToday = startOfDay(new Date()).toISOString();
       const { count, error } = await supabase
         .from('orders')
         .select('*', { count: 'exact', head: true })
+        .eq('tenant_id', user?.tenantId)
         .gte('created_at', startOfToday)
         .not('delivery_status', 'eq', null);
       
@@ -30,11 +35,13 @@ export default function Deliveries() {
 
   // Fetch completed deliveries
   const { data: completedDeliveries = 0 } = useQuery({
-    queryKey: ['completed-deliveries-count'],
+    queryKey: ['completed-deliveries-count', user?.tenantId],
+    enabled: !!user?.tenantId,
     queryFn: async () => {
       const { count, error } = await supabase
         .from('orders')
         .select('*', { count: 'exact', head: true })
+        .eq('tenant_id', user?.tenantId)
         .eq('delivery_status', 'completed');
       
       if (error) throw error;
@@ -44,11 +51,13 @@ export default function Deliveries() {
 
   // Fetch total delivery fees
   const { data: totalFees = 0 } = useQuery({
-    queryKey: ['total-delivery-fees'],
+    queryKey: ['total-delivery-fees', user?.tenantId],
+    enabled: !!user?.tenantId,
     queryFn: async () => {
       const { data, error } = await supabase
         .from('orders')
         .select('delivery_fee')
+        .eq('tenant_id', user?.tenantId)
         .not('delivery_fee', 'is', null);
       
       if (error) throw error;
@@ -58,11 +67,13 @@ export default function Deliveries() {
 
   // Fetch active drivers
   const { data: activeDrivers = 0 } = useQuery({
-    queryKey: ['active-drivers-count'],
+    queryKey: ['active-drivers-count', user?.tenantId],
+    enabled: !!user?.tenantId,
     queryFn: async () => {
       const { count, error } = await supabase
         .from('drivers')
         .select('*', { count: 'exact', head: true })
+        .eq('tenant_id', user?.tenantId)
         .eq('status', 'Ativo');
       
       if (error) throw error;
