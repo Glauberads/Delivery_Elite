@@ -36,6 +36,7 @@ interface RestaurantRow {
   planId: string;
   planLabel: string;
   subscriptionStatus: SubscriptionStatus | "";
+  trialEndsAt: string;
 }
 
 const emptyForm: RestaurantRow = {
@@ -49,6 +50,7 @@ const emptyForm: RestaurantRow = {
   planId: "",
   planLabel: "",
   subscriptionStatus: "trialing",
+  trialEndsAt: "",
 };
 
 const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
@@ -192,6 +194,7 @@ export default function SuperAdminRestaurants() {
       planId: plan?.id ?? "",
       planLabel: plan ? `${plan.name} • R$ ${Number(plan.price).toFixed(2).replace(".", ",")}` : "Sem plano",
       subscriptionStatus: subscription?.status ?? "",
+      trialEndsAt: tenant.trial_ends_at ? new Date(tenant.trial_ends_at).toISOString().split("T")[0] : "",
     };
   });
 
@@ -252,38 +255,33 @@ export default function SuperAdminRestaurants() {
 
       if (error) throw error;
 
-      if (shouldApplyProrata && tenantId) {
-        const currentPlanDays = Number(currentPlan?.billing_days ?? 0);
-        const daysRemaining = getDaysDifference(currentSubscription?.current_period_end ?? currentTenant?.trial_ends_at);
-        const daysUsed = Math.max(0, currentPlanDays - daysRemaining);
-        const nextPlanDays = Number(nextPlan?.billing_days ?? 0);
-        const newDaysRemaining = nextPlanDays - daysUsed;
-        const nextPeriodEndsAt = addDaysFromToday(newDaysRemaining);
-
+      if (tenantId) {
+        const finalDate = formData.trialEndsAt ? new Date(formData.trialEndsAt).toISOString() : null;
+        
         if (currentSubscription?.tenant_id) {
           const { error: subscriptionUpdateError } = await supabase
             .from("tenant_subscriptions")
             .update({
-              plan_id: formData.planId,
-              current_period_end: nextPeriodEndsAt,
+              plan_id: formData.planId || null,
+              current_period_end: finalDate,
             })
             .eq("tenant_id", tenantId);
 
           if (subscriptionUpdateError) {
             throw subscriptionUpdateError;
           }
-        } else {
-          const { error: tenantUpdateError } = await supabase
-            .from("tenants")
-            .update({
-              plan_id: formData.planId,
-              trial_ends_at: nextPeriodEndsAt,
-            })
-            .eq("id", tenantId);
+        }
+        
+        const { error: tenantUpdateError } = await supabase
+          .from("tenants")
+          .update({
+            plan_id: formData.planId || null,
+            trial_ends_at: finalDate,
+          })
+          .eq("id", tenantId);
 
-          if (tenantUpdateError) {
-            throw tenantUpdateError;
-          }
+        if (tenantUpdateError) {
+          throw tenantUpdateError;
         }
       }
 
@@ -507,7 +505,34 @@ export default function SuperAdminRestaurants() {
               </div>
               <div className="space-y-2">
                 <Label>Plano</Label>
-                <Select value={formData.planId || "none"} onValueChange={(value) => setFormData((prev) => ({ ...prev, planId: value === "none" ? "" : value }))}>
+                <Select 
+                  value={formData.planId || "none"} 
+                  onValueChange={(value) => {
+                    const nextPlan = plans.find(p => p.id === value);
+                    let newTrialEndsAt = formData.trialEndsAt;
+                    
+                    if (nextPlan) {
+                       const currentPlan = plans.find(p => p.id === formData.planId);
+                       if (currentPlan && formData.tenantId) {
+                          const currentPlanDays = Number(currentPlan.billing_days ?? 0);
+                          const daysRemaining = formData.trialEndsAt ? Math.ceil((new Date(formData.trialEndsAt).getTime() - Date.now()) / (1000 * 3600 * 24)) : 0;
+                          const daysUsed = Math.max(0, currentPlanDays - daysRemaining);
+                          const nextPlanDays = Number(nextPlan.billing_days ?? 0);
+                          const newDaysRemaining = Math.max(0, nextPlanDays - daysUsed);
+                          const nextDate = new Date();
+                          nextDate.setDate(nextDate.getDate() + newDaysRemaining);
+                          newTrialEndsAt = nextDate.toISOString().split('T')[0];
+                       } else {
+                          const nextPlanDays = Number(nextPlan.billing_days ?? 30);
+                          const nextDate = new Date();
+                          nextDate.setDate(nextDate.getDate() + nextPlanDays);
+                          newTrialEndsAt = nextDate.toISOString().split('T')[0];
+                       }
+                    }
+                    
+                    setFormData((prev) => ({ ...prev, planId: value === "none" ? "" : value, trialEndsAt: newTrialEndsAt }))
+                  }}
+                >
                   <SelectTrigger className={formFieldClassName}>
                     <SelectValue placeholder="Selecione um plano" />
                   </SelectTrigger>
@@ -520,6 +545,16 @@ export default function SuperAdminRestaurants() {
                     ))}
                   </SelectContent>
                 </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="trial-ends-at">Vencimento / Fim do Trial</Label>
+                <Input
+                  id="trial-ends-at"
+                  type="date"
+                  className={formFieldClassName}
+                  value={formData.trialEndsAt}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, trialEndsAt: e.target.value }))}
+                />
               </div>
             </div>
           </div>
