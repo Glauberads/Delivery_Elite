@@ -267,6 +267,11 @@ export function OrderReceipt({ orderId }: OrderReceiptProps) {
         {order.table_number && (
           <div className="mb-1">Mesa: {order.table_number}</div>
         )}
+        {order.notes && (
+          <div className="mb-1 mt-3 p-2 border border-dashed rounded-md font-bold uppercase">
+            OBS: {order.notes}
+          </div>
+        )}
       </div>
 
       {/* Separator */}

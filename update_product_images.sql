@@ -1,0 +1,13 @@
+UPDATE products SET image_url = '/img/products/hamburguer_1787284606069.png' WHERE name = 'HAMBÚRGUER' AND tenant_id = 'b8b7c9a0-173f-4e64-b35d-73a04b8bfb8c';
+UPDATE products SET image_url = '/img/products/x_burguer_1787284614857.png' WHERE name = 'X-BURGUER' AND tenant_id = 'b8b7c9a0-173f-4e64-b35d-73a04b8bfb8c';
+UPDATE products SET image_url = '/img/products/x_egg_burguer_1787284623433.png' WHERE name = 'X-EGG BURGUER' AND tenant_id = 'b8b7c9a0-173f-4e64-b35d-73a04b8bfb8c';
+UPDATE products SET image_url = '/img/products/x_bacon_1787284633769.png' WHERE name = 'X-BACON' AND tenant_id = 'b8b7c9a0-173f-4e64-b35d-73a04b8bfb8c';
+UPDATE products SET image_url = '/img/products/x_egg_bacon_1787284643386.png' WHERE name = 'X-EGG BACON' AND tenant_id = 'b8b7c9a0-173f-4e64-b35d-73a04b8bfb8c';
+UPDATE products SET image_url = '/img/products/x_calabresa_1787284662115.png' WHERE name = 'X-CALABRESA' AND tenant_id = 'b8b7c9a0-173f-4e64-b35d-73a04b8bfb8c';
+UPDATE products SET image_url = '/img/products/x_egg_calabresa_1787284672108.png' WHERE name = 'X-EGG CALABRESA' AND tenant_id = 'b8b7c9a0-173f-4e64-b35d-73a04b8bfb8c';
+UPDATE products SET image_url = '/img/products/x_frango_1787284680648.png' WHERE name = 'X-FRANGO' AND tenant_id = 'b8b7c9a0-173f-4e64-b35d-73a04b8bfb8c';
+UPDATE products SET image_url = '/img/products/x_egg_frango_1787284690481.png' WHERE name = 'X-EGG FRANGO' AND tenant_id = 'b8b7c9a0-173f-4e64-b35d-73a04b8bfb8c';
+UPDATE products SET image_url = '/img/products/x_tudo_1787284700816.png' WHERE name = 'X-TUDO' AND tenant_id = 'b8b7c9a0-173f-4e64-b35d-73a04b8bfb8c';
+UPDATE products SET image_url = '/img/products/x_familia_1787284720457.png' WHERE name = 'X-FAMÍLIA' AND tenant_id = 'b8b7c9a0-173f-4e64-b35d-73a04b8bfb8c';
+UPDATE products SET image_url = '/img/products/hotdog_salsicha_1787284729489.png' WHERE name = 'HOT DOG DE SALCICHA' AND tenant_id = 'b8b7c9a0-173f-4e64-b35d-73a04b8bfb8c';
+UPDATE products SET image_url = '/img/products/hotdog_linguica_1787284740427.png' WHERE name = 'HOT DOG DE LINGUIÇA' AND tenant_id = 'b8b7c9a0-173f-4e64-b35d-73a04b8bfb8c';

@@ -136,7 +136,7 @@ export function PrintReceiptDialog({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-[350px]">
+      <DialogContent className="max-w-[350px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Imprimir Comanda</DialogTitle>
           <DialogDescription className="sr-only">

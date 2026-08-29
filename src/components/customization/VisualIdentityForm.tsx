@@ -129,45 +129,9 @@ export function VisualIdentityForm() {
   return (
     <form onSubmit={handleThemeSubmit} className="space-y-6">
       <div className="space-y-4">
-        <div className="space-y-2">
-          <Label htmlFor="logoUrl">URL da Logo</Label>
-          <div className="flex gap-4">
-            <Input
-              id="logoUrl"
-              name="logoUrl"
-              type="url"
-              placeholder="https://exemplo.com/logo.png"
-              value={themeData.logoUrl}
-              onChange={handleThemeChange}
-            />
-            <Button type="button" size="icon" variant="outline">
-              <Image className="h-4 w-4" />
-            </Button>
-          </div>
-          <p className="text-sm text-muted-foreground">
-            Recomendado: 200x50 pixels, formato PNG ou SVG
-          </p>
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="faviconUrl">URL do Favicon</Label>
-          <div className="flex gap-4">
-            <Input
-              id="faviconUrl"
-              name="faviconUrl"
-              type="url"
-              placeholder="https://exemplo.com/favicon.png"
-              value={themeData.faviconUrl}
-              onChange={handleThemeChange}
-            />
-            <Button type="button" size="icon" variant="outline">
-              <Image className="h-4 w-4" />
-            </Button>
-          </div>
-          <p className="text-sm text-muted-foreground">
-            Recomendado: 32x32 pixels, formato PNG
-          </p>
-        </div>
+      <div className="space-y-4">
+        {/* Logo and Favicon are now managed in the ImagesManager component */}
+      </div>
       </div>
 
       <div className="grid gap-4 md:grid-cols-3">
