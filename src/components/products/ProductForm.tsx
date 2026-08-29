@@ -775,7 +775,10 @@ export function ProductForm({
 
               {/* ── Área 1: Vínculos de Atributos ─────────────────────────── */}
               <div className="rounded-lg border p-4 space-y-4">
-                <p className="text-sm font-medium">Vínculos de Atributos</p>
+                <div>
+                  <p className="text-sm font-medium">Vínculos de Atributos (Múltipla Escolha)</p>
+                  <p className="text-xs text-muted-foreground">Vincule adicionais ou acompanhamentos previamente cadastrados. O cliente poderá selecionar várias opções ao mesmo tempo (ex: Bacon, Catupiry, Milho).</p>
+                </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {/* Coluna 1 — Adicionais/Extras */}
@@ -787,7 +790,9 @@ export function ProductForm({
                     {extrasEnabled && (
                       <div className="space-y-1 max-h-44 overflow-y-auto">
                         {extrasGroups.length === 0 ? (
-                          <p className="text-xs text-muted-foreground">Nenhum atributo do tipo Adicionais cadastrado.</p>
+                          <p className="text-xs text-muted-foreground">
+                            Nenhum grupo de adicionais cadastrado. Crie-os primeiro no menu de Produtos &gt; Complementos para que apareçam aqui.
+                          </p>
                         ) : (
                           <>
                             {/* Marcar todos */}
@@ -825,7 +830,9 @@ export function ProductForm({
                     {sidesEnabled && (
                       <div className="space-y-1 max-h-44 overflow-y-auto">
                         {sidesGroups.length === 0 ? (
-                          <p className="text-xs text-muted-foreground">Nenhum atributo do tipo Acompanhamentos cadastrado.</p>
+                          <p className="text-xs text-muted-foreground">
+                            Nenhum grupo de acompanhamentos cadastrado. Crie-os primeiro no menu de Produtos &gt; Complementos.
+                          </p>
                         ) : (
                           <>
                             {/* Marcar todos */}
@@ -875,8 +882,10 @@ export function ProductForm({
               <div className="rounded-lg border p-4 space-y-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium">Variações</p>
-                    <p className="text-xs text-muted-foreground">Ex: Tamanhos com preços diferentes</p>
+                    <p className="text-sm font-medium text-destructive">Variações (Escolha Única e Obrigatória)</p>
+                    <p className="text-xs text-muted-foreground">
+                      Ex: Tamanhos (20cm, 30cm) ou Tipo de Massa. <strong>Apenas 1 opção poderá ser escolhida.</strong> <br/>Não cadastre ingredientes extras aqui!
+                    </p>
                   </div>
                   <Switch
                     id="variations-toggle"
