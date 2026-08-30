@@ -123,7 +123,7 @@ export default function Radar() {
 
             <Button 
               className="w-full bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-600/30 h-14 text-base font-bold rounded-xl transition-all hover:scale-[1.02]"
-              onClick={() => window.open("https://wa.me/5522981711078?text=gostaria%20de%20habilitar%20o%20radar%20pra%20aacompnhar%20meus%20moto%20boys", "_blank")}
+              onClick={() => window.open("https://wa.me/5522981711078?text=Quero%20habilitar%20o%20*Radar%20de%20Motoboys*%20para%20acompanhar%20a%20localiza%C3%A7%C3%A3o%20e%20as%20entregas%20em%20tempo%20real.", "_blank")}
             >
               Quero Habilitar o Radar Agora
             </Button>
