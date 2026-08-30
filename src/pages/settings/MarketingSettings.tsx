@@ -122,7 +122,7 @@ export default function MarketingSettings() {
             <div className="bg-zinc-950/50 border border-zinc-800/50 rounded-2xl p-5 text-left space-y-4 mb-8">
               <div className="flex items-start gap-3">
                 <CheckCircle2 className="w-5 h-5 text-green-500 mt-0.5 shrink-0" />
-                <p className="text-sm text-zinc-400"><strong className="text-zinc-200 block">Retargeting Poderoso</strong> Recupere clientes que visitaram o cardápio e não finalizaram a compra.</p>
+                <p className="text-sm text-zinc-400"><strong className="text-zinc-200 block">Remarketing Poderoso</strong> Recupere clientes que visitaram o cardápio e não finalizaram a compra.</p>
               </div>
               <div className="flex items-start gap-3">
                 <CheckCircle2 className="w-5 h-5 text-green-500 mt-0.5 shrink-0" />
