@@ -20,6 +20,7 @@ import { CategoryFilter } from "@/components/home/CategoryFilter";
 import { FloatingCart } from "@/components/home/FloatingCart";
 import { ActiveOrderBanner } from "@/components/home/ActiveOrderBanner";
 import { ProductDetailDialog } from "@/components/home/ProductDetailDialog";
+import { FeaturedCarousel } from "@/components/home/FeaturedCarousel";
 import { Product, ProductAddon } from "@/types";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -320,6 +321,8 @@ export default function Home({ overrideSlug }: { overrideSlug?: string }) {
     return hasVariations || hasGroups || hasFractionalGroup;
   };
 
+  const featuredProducts = products.filter((p) => p.featured && p.available);
+
   const handleAddToCart = (
     product: Product,
     quantity = 1,
@@ -539,6 +542,26 @@ export default function Home({ overrideSlug }: { overrideSlug?: string }) {
                       disabled={orderingBlocked}
                     />
                   </div>
+
+                  {!searchQuery && featuredProducts.length > 0 && (
+                    <FeaturedCarousel
+                      products={featuredProducts}
+                      orderingBlocked={orderingBlocked}
+                      onAddToCart={(product, quantity, addons, notes, variation) => {
+                        const fromConfiguredSelection =
+                          quantity !== undefined ||
+                          (addons && addons.length > 0) ||
+                          Boolean(notes) ||
+                          Boolean(variation);
+
+                        if (shouldOpenProductDialog(product) && !fromConfiguredSelection) {
+                          setSelectedProduct(product);
+                        } else {
+                          handleAddToCart(product, quantity, addons, notes, variation);
+                        }
+                      }}
+                    />
+                  )}
 
                   <CategoryFilter
                     categories={categories}
