@@ -23,12 +23,12 @@ export default function MarketingSettings() {
   const { data: tenant, isLoading, refetch } = useQuery({
     queryKey: ["tenant_marketing", user?.id],
     queryFn: async () => {
-      if (!user) return null;
+      if (!user?.tenantId) return null;
       
       const { data, error } = await supabase
         .from("tenants")
         .select("id, facebook_pixel_id, google_tag_id, marketing_enabled")
-        .eq("user_id", user.id)
+        .eq("id", user.tenantId)
         .single();
         
       if (error) throw error;
