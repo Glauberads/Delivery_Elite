@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Save, AlertCircle } from "lucide-react";
+import { Save, AlertCircle, Megaphone, CheckCircle2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
@@ -101,21 +101,51 @@ export default function MarketingSettings() {
   // Verifica se o módulo está liberado pelo SuperAdmin
   if (!tenant?.marketing_enabled) {
     return (
-      <div className="p-6 max-w-3xl">
-        <h1 className="text-2xl font-bold mb-2">Marketing (Pixel e Tags)</h1>
-        <p className="text-muted-foreground mb-6">
-          Integre sua loja com ferramentas de anúncio.
-        </p>
-        
-        <Alert className="bg-amber-50 border-amber-200 dark:bg-amber-950/30 dark:border-amber-800">
-          <AlertCircle className="h-4 w-4 text-amber-600 dark:text-amber-400" />
-          <AlertTitle className="text-amber-800 dark:text-amber-300">Módulo Bloqueado</AlertTitle>
-          <AlertDescription className="text-amber-700 dark:text-amber-400 mt-2">
-            O módulo de Marketing Avançado (Facebook Pixel e Google Tag) é um recurso exclusivo e não está liberado para a sua conta no momento.
-            <br /><br />
-            Entre em contato com o suporte ou comercial para fazer um upgrade e ativar esta função.
-          </AlertDescription>
-        </Alert>
+      <div className="flex flex-col h-full bg-zinc-950 text-white min-h-[calc(100vh-80px)] -m-6">
+        <div className="flex-1 flex items-center justify-center p-6">
+          <div className="max-w-md w-full bg-zinc-900/50 p-8 rounded-3xl shadow-2xl text-center relative overflow-hidden border border-zinc-800/50 backdrop-blur-sm">
+            {/* Efeito de brilho de fundo */}
+            <div className="absolute top-0 inset-x-0 h-40 bg-gradient-to-b from-orange-500/10 to-transparent -z-10" />
+
+            <div className="w-20 h-20 bg-orange-500/10 text-orange-500 rounded-full flex items-center justify-center mx-auto mb-4 shadow-inner ring-4 ring-orange-500/20">
+              <Megaphone className="w-10 h-10" />
+            </div>
+            
+            <h2 className="text-2xl font-extrabold text-white mb-3 tracking-tight">
+              Escale suas vendas com <span className="text-orange-500">Tráfego Pago</span>
+            </h2>
+            
+            <p className="text-zinc-400 mb-6 text-sm leading-relaxed">
+              Desbloqueie o <strong className="text-zinc-200">Módulo de Marketing</strong> e integre seu catálogo com Facebook Pixel e Google Analytics para campanhas de alta conversão.
+            </p>
+            
+            <div className="bg-zinc-950/50 border border-zinc-800/50 rounded-2xl p-5 text-left space-y-4 mb-8">
+              <div className="flex items-start gap-3">
+                <CheckCircle2 className="w-5 h-5 text-green-500 mt-0.5 shrink-0" />
+                <p className="text-sm text-zinc-400"><strong className="text-zinc-200 block">Retargeting Poderoso</strong> Persiga clientes que visitaram o cardápio e não finalizaram a compra.</p>
+              </div>
+              <div className="flex items-start gap-3">
+                <CheckCircle2 className="w-5 h-5 text-green-500 mt-0.5 shrink-0" />
+                <p className="text-sm text-zinc-400"><strong className="text-zinc-200 block">Métricas Precisas</strong> Saiba exatamente qual anúncio no Instagram ou Google traz mais pedidos.</p>
+              </div>
+              <div className="flex items-start gap-3">
+                <CheckCircle2 className="w-5 h-5 text-green-500 mt-0.5 shrink-0" />
+                <p className="text-sm text-zinc-400"><strong className="text-zinc-200 block">Máxima Conversão</strong> Encontre e foque o seu orçamento no público que mais gasta na sua loja.</p>
+              </div>
+            </div>
+
+            <Button 
+              className="w-full bg-orange-600 hover:bg-orange-500 text-white shadow-[0_0_20px_rgba(234,88,12,0.3)] h-14 text-base font-bold rounded-xl transition-all hover:scale-[1.02]"
+              onClick={() => window.open("https://wa.me/5522981711078?text=Quero%20habilitar%20o%20*M%C3%B3dulo%20de%20Marketing*%20para%20integrar%20meu%20Pixel%20e%20aumentar%20minhas%20vendas.", "_blank")}
+            >
+              Quero Vender Mais Agora
+            </Button>
+            
+            <p className="text-xs text-zinc-500 mt-5 font-medium">
+              Fale diretamente com nosso suporte comercial no WhatsApp
+            </p>
+          </div>
+        </div>
       </div>
     );
   }
