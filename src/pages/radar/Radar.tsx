@@ -90,9 +90,7 @@ export default function Radar() {
       <div className="flex flex-col h-full bg-slate-50">
         <Header title="Radar de Entregas" />
         <div className="flex-1 flex items-center justify-center p-6">
-          <div className="max-w-md w-full bg-white p-8 rounded-3xl shadow-xl shadow-slate-200/50 text-center relative overflow-hidden border border-slate-100">
-            {/* Efeito de brilho de fundo */}
-            <div className="absolute top-0 inset-x-0 h-32 bg-gradient-to-b from-orange-50 to-transparent -z-10" />
+          <div className="max-w-md w-full p-8 text-center relative">
 
             <div className="w-20 h-20 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-inner ring-8 ring-orange-50">
               <MapPin className="w-10 h-10" />
@@ -106,7 +104,7 @@ export default function Radar() {
               Desbloqueie o <strong className="text-slate-700">Radar em Tempo Real</strong> e tenha o controle absoluto da sua logística. Sem achismos, apenas precisão.
             </p>
             
-            <div className="bg-slate-50 border border-slate-100 rounded-2xl p-5 text-left space-y-4 mb-8">
+            <div className="bg-transparent p-5 text-left space-y-4 mb-8">
               <div className="flex items-start gap-3">
                 <CheckCircle2 className="w-5 h-5 text-green-500 mt-0.5 shrink-0" />
                 <p className="text-sm text-slate-700"><strong className="text-slate-900 block">Segurança Total</strong> Acompanhe todas as rotas ao vivo no mapa e proteja suas entregas.</p>
