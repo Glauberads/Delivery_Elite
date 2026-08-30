@@ -18,6 +18,7 @@ import {
   Package2,
   Users,
   Megaphone,
+  Navigation,
 } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useAuth } from "@/contexts/AuthContext";
@@ -70,6 +71,11 @@ const navItems = [
     title: "Marketing",
     href: "/admin/marketing",
     icon: Megaphone,
+  },
+  {
+    title: "Radar",
+    href: "/radar",
+    icon: Navigation,
   },
   //  {
   //    title: 'Evolution API',

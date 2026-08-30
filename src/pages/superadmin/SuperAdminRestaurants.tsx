@@ -38,6 +38,7 @@ interface RestaurantRow {
   subscriptionStatus: SubscriptionStatus | "";
   trialEndsAt: string;
   marketing_enabled: boolean;
+  driver_tracking_enabled: boolean;
 }
 
 const emptyForm: RestaurantRow = {
@@ -53,6 +54,7 @@ const emptyForm: RestaurantRow = {
   subscriptionStatus: "trialing",
   trialEndsAt: "",
   marketing_enabled: false,
+  driver_tracking_enabled: false,
 };
 
 const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
@@ -164,7 +166,7 @@ export default function SuperAdminRestaurants() {
     queryKey: ["superadmin", "restaurants"],
     queryFn: async () => {
       const [tenantsResult, plansResult, subscriptionsResult] = await Promise.all([
-        supabase.from("tenants").select("id, name, slug, email, phone, status, plan_id, trial_ends_at, marketing_enabled").order("created_at", { ascending: false }),
+        supabase.from("tenants").select("id, name, slug, email, phone, status, plan_id, trial_ends_at, marketing_enabled, driver_tracking_enabled").order("created_at", { ascending: false }),
         supabase.from("plans").select("id, name, type, price, billing_days"),
         supabase.from("tenant_subscriptions").select("tenant_id, plan_id, status, current_period_end"),
       ]);
@@ -198,6 +200,7 @@ export default function SuperAdminRestaurants() {
       subscriptionStatus: subscription?.status ?? "",
       trialEndsAt: tenant.trial_ends_at ? new Date(tenant.trial_ends_at).toISOString().split("T")[0] : "",
       marketing_enabled: tenant.marketing_enabled ?? false,
+      driver_tracking_enabled: tenant.driver_tracking_enabled ?? false,
     };
   });
 
@@ -281,6 +284,7 @@ export default function SuperAdminRestaurants() {
             plan_id: formData.planId || null,
             trial_ends_at: finalDate,
             marketing_enabled: formData.marketing_enabled,
+            driver_tracking_enabled: formData.driver_tracking_enabled,
           })
           .eq("id", tenantId);
 
@@ -563,6 +567,18 @@ export default function SuperAdminRestaurants() {
               <div className="space-y-2">
                 <Label htmlFor="marketing-enabled">Módulo de Marketing (Pixel/Tag)</Label>
                 <Select value={formData.marketing_enabled ? "true" : "false"} onValueChange={(val) => setFormData(p => ({ ...p, marketing_enabled: val === "true" }))}>
+                  <SelectTrigger className={formFieldClassName}>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="border-border bg-background text-foreground">
+                    <SelectItem value="true">Ativado (Liberado)</SelectItem>
+                    <SelectItem value="false">Desativado (Bloqueado)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="driver-tracking-enabled">Radar de Entregadores (Tempo Real)</Label>
+                <Select value={formData.driver_tracking_enabled ? "true" : "false"} onValueChange={(val) => setFormData(p => ({ ...p, driver_tracking_enabled: val === "true" }))}>
                   <SelectTrigger className={formFieldClassName}>
                     <SelectValue />
                   </SelectTrigger>

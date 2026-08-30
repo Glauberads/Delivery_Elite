@@ -18,6 +18,7 @@ import NotFound from "./pages/NotFound";
 import Index from "./pages/Index";
 import { AnalyticsInjector } from "./components/AnalyticsInjector";
 import { DomainResolver } from "./components/DomainResolver";
+import DriverTracker from "./pages/tracker/DriverTracker";
 
 // Páginas de tenant (restaurante)
 import Dashboard from "./pages/Dashboard";
@@ -32,6 +33,7 @@ import Profile from "./pages/settings/Profile";
 import TenantProfile from "./pages/tenant/Profile";
 import TenantSettings from "./pages/tenant/Settings";
 import MarketingSettings from "./pages/settings/MarketingSettings";
+import Radar from "./pages/radar/Radar";
 
 // Páginas de Super Admin (criadas na Fase 4)
 import SuperAdminLayout from "./pages/superadmin/SuperAdminLayout";
@@ -70,6 +72,7 @@ function App() {
               <Route path="/reset-password" element={<ResetPassword />} />
               <Route path="/r/:slug" element={<Home />} />
               <Route path="/track-order/:orderId" element={<TrackOrder />} />
+              <Route path="/tracker/:tenantId/:driverId" element={<DriverTracker />} />
 
               {/* ── Rotas de Tenant (restaurante) ─────────────── */}
               <Route element={<PrivateRoute />}>
@@ -93,6 +96,7 @@ function App() {
                   <Route path="/admin/marketing" element={<MarketingSettings />} />
                   <Route path="/admin/plans" element={<Navigate to="/admin/profile?tab=plans" replace />} />
                   <Route path="/admin/checkout" element={<Navigate to="/admin/profile?billing=renew" replace />} />
+                  <Route path="/radar" element={<Radar />} />
                 </Route>
               </Route>
 

@@ -7,7 +7,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Plus, Edit, Trash2 } from 'lucide-react';
+import { Plus, Edit, Trash2, Link as LinkIcon } from 'lucide-react';
 import {
   Dialog,
   DialogClose,
@@ -135,6 +135,13 @@ export function DriverSettings() {
     }
   };
 
+  const copyTrackingLink = (driverId: string) => {
+    if (!user?.tenantId) return;
+    const trackingUrl = `${window.location.origin}/tracker/${user.tenantId}/${driverId}`;
+    navigator.clipboard.writeText(trackingUrl);
+    toast.success('Link de rastreio copiado para área de transferência!');
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
@@ -174,6 +181,9 @@ export function DriverSettings() {
                   </Badge>
                 </TableCell>
                 <TableCell className="text-right">
+                  <Button variant="ghost" size="icon" onClick={() => copyTrackingLink(driver.id)} title="Copiar link de rastreio">
+                    <LinkIcon className="h-4 w-4 text-blue-500" />
+                  </Button>
                   <Button variant="ghost" size="icon" onClick={() => openEditDialog(driver)}>
                     <Edit className="h-4 w-4" />
                   </Button>
