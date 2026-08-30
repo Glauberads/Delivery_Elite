@@ -98,7 +98,10 @@ export default function Radar() {
             <p className="text-slate-600 mb-6">
               O rastreamento em tempo real dos entregadores não está ativo na sua conta. Entre em contato com o suporte para assinar este módulo.
             </p>
-            <Button className="w-full bg-orange-500 hover:bg-orange-600 text-white">
+            <Button 
+              className="w-full bg-orange-500 hover:bg-orange-600 text-white"
+              onClick={() => window.open("https://wa.me/5522981711078?text=gostaria%20de%20habilitar%20o%20radar%20pra%20aacompnhar%20meus%20moto%20boys", "_blank")}
+            >
               Falar com o Suporte
             </Button>
           </div>
