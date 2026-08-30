@@ -75,7 +75,7 @@ export default function Dashboard() {
             </div>
           </Link>
 
-          <Link to="/settings/marketing" className="group relative overflow-hidden rounded-xl border border-blue-500/20 bg-gradient-to-br from-blue-500/5 to-transparent p-6 hover:border-blue-500/30 transition-all hover:shadow-lg hover:shadow-blue-500/5">
+          <Link to="/admin/marketing" className="group relative overflow-hidden rounded-xl border border-blue-500/20 bg-gradient-to-br from-blue-500/5 to-transparent p-6 hover:border-blue-500/30 transition-all hover:shadow-lg hover:shadow-blue-500/5">
             <div className="flex items-center gap-4">
               <div className="p-3 bg-blue-500/10 rounded-lg text-blue-500">
                 <Megaphone className="h-6 w-6" />
