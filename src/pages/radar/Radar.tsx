@@ -87,46 +87,48 @@ export default function Radar() {
 
   if (!tenant?.driver_tracking_enabled) {
     return (
-      <div className="flex flex-col h-full bg-slate-50">
+      <div className="flex flex-col h-full bg-zinc-950 text-white">
         <Header title="Radar de Entregas" />
         <div className="flex-1 flex items-center justify-center p-6">
-          <div className="max-w-md w-full p-8 text-center relative">
+          <div className="max-w-md w-full bg-zinc-900/50 p-8 rounded-3xl shadow-2xl text-center relative overflow-hidden border border-zinc-800/50 backdrop-blur-sm">
+            {/* Efeito de brilho de fundo */}
+            <div className="absolute top-0 inset-x-0 h-40 bg-gradient-to-b from-orange-500/10 to-transparent -z-10" />
 
-            <div className="w-20 h-20 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-inner ring-8 ring-orange-50">
+            <div className="w-20 h-20 bg-orange-500/10 text-orange-500 rounded-full flex items-center justify-center mx-auto mb-4 shadow-inner ring-4 ring-orange-500/20">
               <MapPin className="w-10 h-10" />
             </div>
             
-            <h2 className="text-2xl font-extrabold text-slate-800 mb-3 tracking-tight">
-              Onde estão seus motoboys <span className="text-orange-600">agora?</span>
+            <h2 className="text-2xl font-extrabold text-white mb-3 tracking-tight">
+              Onde estão seus motoboys <span className="text-orange-500">agora?</span>
             </h2>
             
-            <p className="text-slate-500 mb-6 text-sm leading-relaxed">
-              Desbloqueie o <strong className="text-slate-700">Radar em Tempo Real</strong> e tenha o controle absoluto da sua logística. Sem achismos, apenas precisão.
+            <p className="text-zinc-400 mb-6 text-sm leading-relaxed">
+              Desbloqueie o <strong className="text-zinc-200">Radar em Tempo Real</strong> e tenha o controle absoluto da sua logística. Sem achismos, apenas precisão.
             </p>
             
-            <div className="bg-transparent p-5 text-left space-y-4 mb-8">
+            <div className="bg-zinc-950/50 border border-zinc-800/50 rounded-2xl p-5 text-left space-y-4 mb-8">
               <div className="flex items-start gap-3">
                 <CheckCircle2 className="w-5 h-5 text-green-500 mt-0.5 shrink-0" />
-                <p className="text-sm text-slate-700"><strong className="text-slate-900 block">Segurança Total</strong> Acompanhe todas as rotas ao vivo no mapa e proteja suas entregas.</p>
+                <p className="text-sm text-zinc-400"><strong className="text-zinc-200 block">Segurança Total</strong> Acompanhe todas as rotas ao vivo no mapa e proteja suas entregas.</p>
               </div>
               <div className="flex items-start gap-3">
                 <CheckCircle2 className="w-5 h-5 text-green-500 mt-0.5 shrink-0" />
-                <p className="text-sm text-slate-700"><strong className="text-slate-900 block">Fim das Reclamações</strong> Saiba exatamente responder aos clientes sem precisar ligar pro motoboy.</p>
+                <p className="text-sm text-zinc-400"><strong className="text-zinc-200 block">Fim das Reclamações</strong> Saiba exatamente responder aos clientes sem precisar ligar pro motoboy.</p>
               </div>
               <div className="flex items-start gap-3">
                 <CheckCircle2 className="w-5 h-5 text-green-500 mt-0.5 shrink-0" />
-                <p className="text-sm text-slate-700"><strong className="text-slate-900 block">Agilidade Extra</strong> Descubra quais motoristas estão parados ou fazendo caminhos longos.</p>
+                <p className="text-sm text-zinc-400"><strong className="text-zinc-200 block">Agilidade Extra</strong> Descubra quais motoristas estão parados ou fazendo caminhos longos.</p>
               </div>
             </div>
 
             <Button 
-              className="w-full bg-orange-600 hover:bg-orange-700 text-white shadow-lg shadow-orange-600/30 h-14 text-base font-bold rounded-xl transition-all hover:scale-[1.02]"
+              className="w-full bg-orange-600 hover:bg-orange-500 text-white shadow-[0_0_20px_rgba(234,88,12,0.3)] h-14 text-base font-bold rounded-xl transition-all hover:scale-[1.02]"
               onClick={() => window.open("https://wa.me/5522981711078?text=Quero%20habilitar%20o%20*Radar%20de%20Motoboys*%20para%20acompanhar%20a%20localiza%C3%A7%C3%A3o%20e%20as%20entregas%20em%20tempo%20real.", "_blank")}
             >
               Quero Habilitar o Radar Agora
             </Button>
             
-            <p className="text-xs text-slate-400 mt-4 font-medium">
+            <p className="text-xs text-zinc-500 mt-5 font-medium">
               Fale diretamente com nosso suporte comercial no WhatsApp
             </p>
           </div>
