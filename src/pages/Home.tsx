@@ -459,7 +459,7 @@ export default function Home({ overrideSlug }: { overrideSlug?: string }) {
     setCartOpen(isOpen);
   };
 
-  if (isLoading) {
+  if (isLoadingTenant) {
     return (
       <div className="min-h-screen bg-background px-4 py-10 text-foreground">
         <div className="mx-auto max-w-2xl rounded-xl border border-border bg-card px-6 py-8 text-center shadow-sm">
@@ -470,7 +470,7 @@ export default function Home({ overrideSlug }: { overrideSlug?: string }) {
     );
   }
 
-  if (isError) {
+  if (isPublicTenantError) {
     return (
       <div className="min-h-screen bg-background px-4 py-10 text-foreground">
         <div className="mx-auto max-w-2xl rounded-xl border border-amber-200/80 bg-card px-6 py-8 text-center shadow-sm dark:border-amber-800/80">
