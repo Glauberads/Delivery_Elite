@@ -92,14 +92,14 @@ export default function Radar() {
         <div className="flex-1 flex items-center justify-center p-6">
           <div className="max-w-md w-full bg-white p-8 rounded-3xl shadow-xl shadow-slate-200/50 text-center relative overflow-hidden border border-slate-100">
             {/* Efeito de brilho de fundo */}
-            <div className="absolute top-0 inset-x-0 h-32 bg-gradient-to-b from-blue-50 to-transparent -z-10" />
+            <div className="absolute top-0 inset-x-0 h-32 bg-gradient-to-b from-orange-50 to-transparent -z-10" />
 
-            <div className="w-20 h-20 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-inner ring-8 ring-blue-50">
+            <div className="w-20 h-20 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-inner ring-8 ring-orange-50">
               <MapPin className="w-10 h-10" />
             </div>
             
             <h2 className="text-2xl font-extrabold text-slate-800 mb-3 tracking-tight">
-              Onde estão seus motoboys <span className="text-blue-600">agora?</span>
+              Onde estão seus motoboys <span className="text-orange-600">agora?</span>
             </h2>
             
             <p className="text-slate-500 mb-6 text-sm leading-relaxed">
@@ -122,7 +122,7 @@ export default function Radar() {
             </div>
 
             <Button 
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-600/30 h-14 text-base font-bold rounded-xl transition-all hover:scale-[1.02]"
+              className="w-full bg-orange-600 hover:bg-orange-700 text-white shadow-lg shadow-orange-600/30 h-14 text-base font-bold rounded-xl transition-all hover:scale-[1.02]"
               onClick={() => window.open("https://wa.me/5522981711078?text=Quero%20habilitar%20o%20*Radar%20de%20Motoboys*%20para%20acompanhar%20a%20localiza%C3%A7%C3%A3o%20e%20as%20entregas%20em%20tempo%20real.", "_blank")}
             >
               Quero Habilitar o Radar Agora
