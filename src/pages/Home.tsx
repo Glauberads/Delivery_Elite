@@ -25,6 +25,7 @@ import { Product, ProductAddon } from "@/types";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { usePublicTenant } from "@/hooks/usePublicTenant";
+import { TenantAnalyticsInjector } from "@/components/TenantAnalyticsInjector";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
@@ -458,7 +459,7 @@ export default function Home({ overrideSlug }: { overrideSlug?: string }) {
     setCartOpen(isOpen);
   };
 
-  if (isLoadingTenant) {
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-background px-4 py-10 text-foreground">
         <div className="mx-auto max-w-2xl rounded-xl border border-border bg-card px-6 py-8 text-center shadow-sm">
@@ -469,7 +470,7 @@ export default function Home({ overrideSlug }: { overrideSlug?: string }) {
     );
   }
 
-  if (isPublicTenantError) {
+  if (isError) {
     return (
       <div className="min-h-screen bg-background px-4 py-10 text-foreground">
         <div className="mx-auto max-w-2xl rounded-xl border border-amber-200/80 bg-card px-6 py-8 text-center shadow-sm dark:border-amber-800/80">
@@ -499,6 +500,7 @@ export default function Home({ overrideSlug }: { overrideSlug?: string }) {
         cartOpen ? "overflow-hidden h-screen" : ""
       }`}
     >
+      <TenantAnalyticsInjector tenant={tenant} />
       <RestaurantHeader overrideSlug={overrideSlug} />
 
       <div className="flex flex-col flex-1">

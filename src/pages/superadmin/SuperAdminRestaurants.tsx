@@ -37,6 +37,7 @@ interface RestaurantRow {
   planLabel: string;
   subscriptionStatus: SubscriptionStatus | "";
   trialEndsAt: string;
+  marketing_enabled: boolean;
 }
 
 const emptyForm: RestaurantRow = {
@@ -51,6 +52,7 @@ const emptyForm: RestaurantRow = {
   planLabel: "",
   subscriptionStatus: "trialing",
   trialEndsAt: "",
+  marketing_enabled: false,
 };
 
 const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
@@ -162,7 +164,7 @@ export default function SuperAdminRestaurants() {
     queryKey: ["superadmin", "restaurants"],
     queryFn: async () => {
       const [tenantsResult, plansResult, subscriptionsResult] = await Promise.all([
-        supabase.from("tenants").select("id, name, slug, email, phone, status, plan_id, trial_ends_at").order("created_at", { ascending: false }),
+        supabase.from("tenants").select("id, name, slug, email, phone, status, plan_id, trial_ends_at, marketing_enabled").order("created_at", { ascending: false }),
         supabase.from("plans").select("id, name, type, price, billing_days"),
         supabase.from("tenant_subscriptions").select("tenant_id, plan_id, status, current_period_end"),
       ]);
@@ -195,6 +197,7 @@ export default function SuperAdminRestaurants() {
       planLabel: plan ? `${plan.name} • R$ ${Number(plan.price).toFixed(2).replace(".", ",")}` : "Sem plano",
       subscriptionStatus: subscription?.status ?? "",
       trialEndsAt: tenant.trial_ends_at ? new Date(tenant.trial_ends_at).toISOString().split("T")[0] : "",
+      marketing_enabled: tenant.marketing_enabled ?? false,
     };
   });
 
@@ -277,6 +280,7 @@ export default function SuperAdminRestaurants() {
           .update({
             plan_id: formData.planId || null,
             trial_ends_at: finalDate,
+            marketing_enabled: formData.marketing_enabled,
           })
           .eq("id", tenantId);
 
@@ -555,6 +559,18 @@ export default function SuperAdminRestaurants() {
                   value={formData.trialEndsAt}
                   onChange={(e) => setFormData((prev) => ({ ...prev, trialEndsAt: e.target.value }))}
                 />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="marketing-enabled">Módulo de Marketing (Pixel/Tag)</Label>
+                <Select value={formData.marketing_enabled ? "true" : "false"} onValueChange={(val) => setFormData(p => ({ ...p, marketing_enabled: val === "true" }))}>
+                  <SelectTrigger className={formFieldClassName}>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="border-border bg-background text-foreground">
+                    <SelectItem value="true">Ativado (Liberado)</SelectItem>
+                    <SelectItem value="false">Desativado (Bloqueado)</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
           </div>

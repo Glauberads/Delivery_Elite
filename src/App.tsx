@@ -31,6 +31,7 @@ import Customization from "./pages/Customization";
 import Profile from "./pages/settings/Profile";
 import TenantProfile from "./pages/tenant/Profile";
 import TenantSettings from "./pages/tenant/Settings";
+import MarketingSettings from "./pages/settings/MarketingSettings";
 
 // Páginas de Super Admin (criadas na Fase 4)
 import SuperAdminLayout from "./pages/superadmin/SuperAdminLayout";
@@ -89,6 +90,7 @@ function App() {
                   <Route path="/profile" element={<Navigate to="/admin/profile" replace />} />
                   <Route path="/admin/profile" element={<TenantProfile />} />
                   <Route path="/admin/settings" element={<Navigate to="/settings" replace />} />
+                  <Route path="/admin/marketing" element={<MarketingSettings />} />
                   <Route path="/admin/plans" element={<Navigate to="/admin/profile?tab=plans" replace />} />
                   <Route path="/admin/checkout" element={<Navigate to="/admin/profile?billing=renew" replace />} />
                 </Route>

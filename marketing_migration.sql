@@ -1,0 +1,4 @@
+ALTER TABLE public.tenants
+ADD COLUMN IF NOT EXISTS facebook_pixel_id VARCHAR(255),
+ADD COLUMN IF NOT EXISTS google_tag_id VARCHAR(255),
+ADD COLUMN IF NOT EXISTS marketing_enabled BOOLEAN DEFAULT false;

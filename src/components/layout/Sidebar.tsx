@@ -14,10 +14,10 @@ import {
   MessageSquare,
   BrainCircuit,
   Menu,
-  X,
   LogOut,
   Package2,
   Users,
+  Megaphone,
 } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useAuth } from "@/contexts/AuthContext";
@@ -65,6 +65,11 @@ const navItems = [
     title: "Configurações",
     href: "/settings",
     icon: Settings,
+  },
+  {
+    title: "Marketing",
+    href: "/admin/marketing",
+    icon: Megaphone,
   },
   //  {
   //    title: 'Evolution API',

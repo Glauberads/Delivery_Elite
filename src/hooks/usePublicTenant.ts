@@ -11,6 +11,9 @@ export interface PublicTenant {
   phone: string | null;
   status: string | null;
   trial_ends_at: string | null;
+  facebook_pixel_id?: string | null;
+  google_tag_id?: string | null;
+  marketing_enabled?: boolean;
 }
 
 export interface PublicRestaurant {
@@ -179,7 +182,7 @@ export function usePublicTenant(overrideSlug?: string) {
 
       const { data: tenant, error: tenantError } = await supabase
         .from("tenants")
-        .select("id, name, slug, phone, status, trial_ends_at")
+        .select("id, name, slug, phone, status, trial_ends_at, facebook_pixel_id, google_tag_id, marketing_enabled")
         .eq("slug", slug)
         .maybeSingle();
 
