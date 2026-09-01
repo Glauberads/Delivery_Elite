@@ -18,6 +18,9 @@ import {
   Store,
   TrendingUp,
   Users,
+  MapPinned,
+  Megaphone,
+  Heart,
 } from "lucide-react";
 
 import { ThemeToggle } from "@/components/ui/theme-toggle";
@@ -35,18 +38,35 @@ const featureCards = [
     title: "Cardápio digital próprio",
     description:
       "Sua loja com identidade própria para divulgar no Instagram, WhatsApp e Google.",
+    isNew: false,
   },
   {
     icon: MonitorSmartphone,
     title: "Painel em tempo real",
     description:
       "Acompanhe pedidos, operação, faturamento e desempenho da loja em um único painel responsivo.",
+    isNew: false,
   },
   {
     icon: Package,
     title: "PDV integrado",
     description:
       "Pedidos presenciais com agilidade, organize o balcão e centralize a operação local no mesmo painel.",
+    isNew: false,
+  },
+  {
+    icon: MapPinned,
+    title: "Entregas sob controle",
+    description:
+      "Acompanhe os entregadores no mapa em tempo real, organize as corridas e saiba o status de cada pedido até a entrega.",
+    isNew: true,
+  },
+  {
+    icon: Megaphone,
+    title: "Marketing que traz o cliente de volta",
+    description:
+      "Crie cupons e campanhas para aumentar a recorrência, recuperar clientes e movimentar os dias mais fracos.",
+    isNew: true,
   },
 ];
 
@@ -134,10 +154,14 @@ function getPlanFeatures(features: PlanRow["features"]) {
   }
 
   return [
-    "Dashboard completo",
+    "Cardápio digital próprio",
     "Gestão de pedidos",
     "PDV integrado",
-    "Relatórios operacionais",
+    "Gestão de entregadores",
+    "Rastreamento em tempo real",
+    "Cupons e campanhas",
+    "Relatórios gerenciais",
+    "Suporte pelo WhatsApp",
   ];
 }
 
@@ -359,12 +383,19 @@ export default function Index() {
             </p>
           </div>
 
-          <div className="mt-14 grid gap-6 lg:grid-cols-3">
-            {featureCards.map((feature) => (
-              <Card key={feature.title} className="group rounded-[1.75rem] border-border/60 bg-card/70 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-primary/40 hover:shadow-xl hover:shadow-primary/5">
+          <div className="mt-14 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-6">
+            {featureCards.map((feature, index) => {
+              const isTopRow = index < 3;
+              return (
+              <Card key={feature.title} className={cn("group rounded-[1.75rem] border-border/60 bg-card/70 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-primary/40 hover:shadow-xl hover:shadow-primary/5 relative overflow-hidden", isTopRow ? "md:col-span-1 lg:col-span-2" : "md:col-span-1 lg:col-span-3")}>
                 <CardContent className="flex h-full flex-col p-8">
+                  {feature.isNew && (
+                    <div className="absolute right-6 top-6 rounded-full bg-primary/10 border border-primary/20 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-primary">
+                      Novo
+                    </div>
+                  )}
                   <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-                    <feature.icon className="h-6 w-6" />
+                    <feature.icon className="h-6 w-6" aria-hidden="true" />
                   </div>
                   <h3 className="text-2xl font-semibold">{feature.title}</h3>
                   <p className="mt-4 text-sm leading-7 text-muted-foreground">{feature.description}</p>
@@ -373,7 +404,29 @@ export default function Index() {
                   </div>
                 </CardContent>
               </Card>
-            ))}
+            )})}
+          </div>
+
+          <div className="mt-16 text-center">
+            <h2 className="text-3xl font-bold tracking-tight md:text-4xl">Do pedido à entrega. Da primeira compra à recompra.</h2>
+            <p className="mt-4 text-lg text-muted-foreground max-w-3xl mx-auto">
+              O VIP Delivery conecta operação, logística e marketing para o restaurante vender mais e manter tudo sob controle.
+            </p>
+          </div>
+
+          <div className="mt-10 grid gap-6 md:grid-cols-2">
+            <Card className="rounded-[2rem] border-border/60 bg-card/60 p-8 shadow-sm lg:p-10">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary mb-6">
+                <MapPinned className="h-6 w-6" aria-hidden="true" />
+              </div>
+              <h3 className="text-2xl font-bold">Gestão de entregadores e rastreamento em tempo real.</h3>
+            </Card>
+            <Card className="rounded-[2rem] border-border/60 bg-card/60 p-8 shadow-sm lg:p-10">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary mb-6">
+                <Megaphone className="h-6 w-6" aria-hidden="true" />
+              </div>
+              <h3 className="text-2xl font-bold">Cupons, campanhas e retenção de clientes.</h3>
+            </Card>
           </div>
 
           <div className="mt-16 grid gap-8 rounded-[2rem] border border-border/60 bg-card/60 p-8 lg:grid-cols-[0.95fr_1.05fr] lg:p-10">
@@ -385,15 +438,17 @@ export default function Index() {
               </p>
             </div>
 
-            <div className="grid gap-4 sm:grid-cols-2">
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {[
                 { icon: Clock3, title: "Agilidade", text: "Pedidos entram organizados e a equipe trabalha com menos atrito." },
                 { icon: Users, title: "Relacionamento", text: "Sua base de clientes continua sendo sua, com canal direto." },
                 { icon: BarChart3, title: "Visibilidade", text: "Acompanhe a operação com mais clareza e tome decisões melhores no dia a dia." },
                 { icon: ShieldCheck, title: "Operacional", text: "Painel estruturado para operação profissional e crescimento." },
+                { icon: MapPinned, title: "Rastreabilidade", text: "Do despacho à entrega, acompanhe cada corrida em tempo real e reduza atrasos e dúvidas." },
+                { icon: Heart, title: "Retenção", text: "Use campanhas e cupons para aumentar a recompra e manter sua marca presente." },
               ].map((item) => (
                 <div key={item.title} className="rounded-3xl border border-border/60 bg-background/70 p-5">
-                  <item.icon className="h-5 w-5 text-primary" />
+                  <item.icon className="h-5 w-5 text-primary" aria-hidden="true" />
                   <h4 className="mt-4 text-lg font-semibold">{item.title}</h4>
                   <p className="mt-2 text-sm leading-6 text-muted-foreground">{item.text}</p>
                 </div>
@@ -524,9 +579,6 @@ export default function Index() {
           <div className="mx-auto max-w-3xl text-center">
             <p className="text-sm font-semibold uppercase tracking-[0.22em] text-primary">Provas Sociais</p>
             <h2 className="mt-4 text-4xl font-bold tracking-tight">Restaurantes precisam de operação, não de promessa vazia</h2>
-            <p className="mt-4 text-lg leading-8 text-muted-foreground">
-              Estruturamos a landing com prova social porque confiança vem de consistência operacional e percepção de marca.
-            </p>
           </div>
 
           <div className="mt-12 grid gap-6 lg:grid-cols-3">
