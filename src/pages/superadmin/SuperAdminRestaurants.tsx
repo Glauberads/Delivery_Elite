@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Edit, ExternalLink, Plus, Trash2 } from "lucide-react";
+import { Edit, ExternalLink, Plus, Trash2, RefreshCcw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
@@ -162,6 +162,12 @@ export default function SuperAdminRestaurants() {
   const [formData, setFormData] = useState<RestaurantRow>(emptyForm);
   const [isSaving, setIsSaving] = useState(false);
 
+  const [renewOpen, setRenewOpen] = useState(false);
+  const [renewData, setRenewData] = useState<RestaurantRow | null>(null);
+  const [renewPlanId, setRenewPlanId] = useState("");
+  const [renewEndDate, setRenewEndDate] = useState("");
+  const [isRenewing, setIsRenewing] = useState(false);
+
   const { data, isLoading, isError, error, refetch } = useQuery({
     queryKey: ["superadmin", "restaurants"],
     queryFn: async () => {
@@ -215,6 +221,52 @@ export default function SuperAdminRestaurants() {
   const handleEdit = (row: RestaurantRow) => {
     setFormData(row);
     setFormOpen(true);
+  };
+
+  const handleRenewClick = (row: RestaurantRow) => {
+    setRenewData(row);
+    setRenewPlanId(row.planId || "");
+    
+    const plan = data?.plans.find(p => p.id === row.planId);
+    const daysToAdd = plan?.billing_days ? Number(plan.billing_days) : 30;
+    
+    let baseDate = new Date();
+    if (row.trialEndsAt) {
+      const currentEnd = new Date(row.trialEndsAt);
+      if (currentEnd > baseDate && row.status === "active") {
+         baseDate = currentEnd;
+      }
+    }
+    
+    baseDate.setDate(baseDate.getDate() + daysToAdd);
+    setRenewEndDate(baseDate.toISOString().split("T")[0]);
+    setRenewOpen(true);
+  };
+
+  const confirmRenew = async () => {
+    if (!renewData || !renewPlanId || !renewEndDate) {
+      toast({ variant: "destructive", description: "Preencha todos os dados da renovação." });
+      return;
+    }
+    setIsRenewing(true);
+    try {
+      const plan = data?.plans.find(p => p.id === renewPlanId);
+      const { error } = await supabase.rpc("superadmin_renew_tenant", {
+        p_tenant_id: renewData.tenantId,
+        p_plan_id: renewPlanId,
+        p_new_end_date: new Date(renewEndDate).toISOString(),
+        p_price: plan ? Number(plan.price) : 0
+      });
+      if (error) throw error;
+      
+      toast({ title: "Renovação concluída", description: "Assinatura renovada com sucesso." });
+      setRenewOpen(false);
+      await refetch();
+    } catch (error) {
+      toast({ variant: "destructive", title: "Erro", description: getFriendlyErrorMessage(error) });
+    } finally {
+      setIsRenewing(false);
+    }
   };
 
   const handleCreate = () => {
@@ -413,7 +465,10 @@ export default function SuperAdminRestaurants() {
                     <TableCell>{row.planLabel}</TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-2">
-                        <Button variant="outline" size="icon" onClick={() => handleEdit(row)}>
+                        <Button variant="outline" size="icon" onClick={() => handleRenewClick(row)} title="Renovar">
+                          <RefreshCcw className="h-4 w-4 text-emerald-500" />
+                        </Button>
+                        <Button variant="outline" size="icon" onClick={() => handleEdit(row)} title="Editar">
                           <Edit className="h-4 w-4" />
                         </Button>
                         <Button variant="outline" size="icon" asChild>
@@ -622,6 +677,66 @@ export default function SuperAdminRestaurants() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <Dialog open={renewOpen} onOpenChange={setRenewOpen}>
+        <DialogContent className="border-border bg-background text-foreground sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Renovar Assinatura</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+               <p className="text-sm text-muted-foreground">Restaurante:</p>
+               <p className="font-medium">{renewData?.restaurantName}</p>
+            </div>
+            <div className="space-y-2">
+              <Label>Plano de Renovação</Label>
+              <Select 
+                value={renewPlanId} 
+                onValueChange={(val) => {
+                  setRenewPlanId(val);
+                  const plan = data?.plans.find(p => p.id === val);
+                  if (plan) {
+                     const daysToAdd = Number(plan.billing_days || 30);
+                     let baseDate = new Date();
+                     if (renewData?.trialEndsAt && renewData.status === "active") {
+                       const currentEnd = new Date(renewData.trialEndsAt);
+                       if (currentEnd > baseDate) baseDate = currentEnd;
+                     }
+                     baseDate.setDate(baseDate.getDate() + daysToAdd);
+                     setRenewEndDate(baseDate.toISOString().split("T")[0]);
+                  }
+                }}
+              >
+                <SelectTrigger className={formFieldClassName}>
+                  <SelectValue placeholder="Selecione um plano" />
+                </SelectTrigger>
+                <SelectContent className="border-border bg-background text-foreground">
+                  {plans.map((plan) => (
+                    <SelectItem key={plan.id} value={plan.id}>
+                      {plan.name} • R$ {Number(plan.price).toFixed(2).replace(".", ",")}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Novo Vencimento</Label>
+              <Input
+                type="date"
+                className={formFieldClassName}
+                value={renewEndDate}
+                onChange={(e) => setRenewEndDate(e.target.value)}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setRenewOpen(false)}>Cancelar</Button>
+            <Button onClick={confirmRenew} disabled={isRenewing} className="bg-emerald-600 hover:bg-emerald-700 text-white">
+              {isRenewing ? "Renovando..." : "Confirmar Renovação"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

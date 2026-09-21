@@ -78,11 +78,13 @@ export function PaymentMethodsManager() {
   });
 
   const { data: paymentMethods, refetch } = useQuery({
-    queryKey: ["payment-methods"],
+    queryKey: ["payment-methods", user?.tenantId],
+    enabled: !!user?.tenantId,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("payment_methods")
         .select("*")
+        .eq("tenant_id", user?.tenantId)
         .order("display_order", { ascending: true });
 
       if (error) {

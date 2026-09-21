@@ -1121,6 +1121,15 @@ export type Database = {
           max_options: number;
         }[];
       };
+      superadmin_renew_tenant: {
+        Args: {
+          p_tenant_id: string;
+          p_plan_id: string;
+          p_new_end_date: string;
+          p_price?: number;
+        };
+        Returns: boolean;
+      };
       superadmin_save_restaurant_with_owner: {
         Args: {
           p_tenant_id?: string | null;

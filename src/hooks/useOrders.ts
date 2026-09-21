@@ -287,14 +287,23 @@ export function usePaginatedOrders({
 }
 
 export function usePaymentMethods() {
+  const { user } = useAuth();
+
   return useQuery({
-    queryKey: ["paymentMethods"],
+    queryKey: ["paymentMethods", user?.tenantId],
+    enabled: !!user?.tenantId,
     queryFn: async () => {
-      const { data, error } = await supabase
+      let query = supabase
         .from("payment_methods")
         .select("*")
         .eq("enabled", true)
         .order("display_order", { ascending: true });
+
+      if (user?.tenantId) {
+        query = query.eq("tenant_id", user.tenantId);
+      }
+
+      const { data, error } = await query;
 
       if (error) {
         throw error;
