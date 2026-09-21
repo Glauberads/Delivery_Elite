@@ -33,7 +33,7 @@ export function useNotifications(enabled = true, scopeKey = "global") {
   const pendingAlarmOrderIdsRef = useRef<Set<string>>(new Set());
   const customAudioRef = useRef<HTMLAudioElement | null>(null);
   const alarmIntervalRef = useRef<number | null>(null);
-  const [soundEnabled, setSoundEnabled] = useState(false);
+  const [soundEnabled, setSoundEnabled] = useState(true);
   const [hasPendingAlarm, setHasPendingAlarm] = useState(false);
   const [customSoundUrl, setCustomSoundUrl] = useState(() => {
     if (typeof window === "undefined") return "";
@@ -103,10 +103,10 @@ export function useNotifications(enabled = true, scopeKey = "global") {
       }
 
       const enabled = notificationAudioContext.state === "running";
-      setSoundEnabled(enabled);
+      setSoundEnabled(true);
       return enabled ? notificationAudioContext : undefined;
     } catch (error) {
-      setSoundEnabled(false);
+      setSoundEnabled(true);
       console.warn("Notification audio could not be enabled:", error);
       return;
     }
