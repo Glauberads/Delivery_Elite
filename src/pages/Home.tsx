@@ -165,26 +165,23 @@ export default function Home({ overrideSlug }: { overrideSlug?: string }) {
           setFetchAttempted(true);
 
           // Public storefront must use tenant-explicit RPC (slug -> tenantId)
-          const { data: productsData, error: productsError } = await supabase.rpc(
-            "get_product_full_by_tenant",
-            { p_tenant_id: tenantId }
-          );
+          const [rpcResult, categoryResult] = await Promise.all([
+            supabase.rpc(
+              "get_product_full_by_tenant",
+              { p_tenant_id: tenantId }
+            ),
+            supabase
+              .from("categories")
+              .select("name, display_order")
+              .eq("tenant_id", tenantId)
+              .order("display_order", { ascending: true }),
+          ]);
 
+          const { data: productsData, error: productsError } = rpcResult;
           if (productsError) throw productsError;
 
-          const { data: displayOrders, error: displayOrderError } = await supabase
-            .from("products")
-            .select("id, display_order")
-            .eq("tenant_id", tenantId);
-
-          if (displayOrderError) throw displayOrderError;
-
-          const orderMap = new Map();
-          if (displayOrders) {
-            displayOrders.forEach(p => {
-              orderMap.set(p.id, p.display_order || 0);
-            });
-          }
+          // Categories: gracefully degrade if anon access fails
+          const dbCategories = (categoryResult.data ?? []).map(c => c.name);
 
           const parseJsonArray = (value: unknown) => {
             if (Array.isArray(value)) return value;
@@ -207,7 +204,7 @@ export default function Home({ overrideSlug }: { overrideSlug?: string }) {
             available: product.available,
             featured: product.featured || false,
             createdAt: new Date(product.created_at),
-            display_order: orderMap.get(product.id) || 0,
+            display_order: 0,
             hasVariations: product.has_variations,
             has_variations: product.has_variations,
             extrasGroupId: product.extras_group_id,
@@ -224,16 +221,6 @@ export default function Home({ overrideSlug }: { overrideSlug?: string }) {
                 groupBehavior: g.behavior_type
               })))
           }));
-
-          const { data: categoryData, error: categoryError } = await supabase
-            .from("categories")
-            .select("name")
-            .eq("tenant_id", tenantId)
-            .order("display_order", { ascending: true });
-            
-          if (categoryError) throw categoryError;
-
-          const dbCategories = categoryData?.map(c => c.name) || [];
 
           formattedProducts.sort((a: any, b: any) => {
              const indexA = dbCategories.indexOf(a.category);
