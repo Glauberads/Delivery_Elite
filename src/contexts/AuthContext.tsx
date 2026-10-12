@@ -545,15 +545,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const errorMessage = getErrorMessage(error);
       console.error("Login error:", error);
 
-      const isEmailNotConfirmed =
-        (error instanceof AuthApiError && /email not confirmed/i.test(error.message)) ||
-        /email not confirmed/i.test(errorMessage);
+      const isNetworkError =
+        /failed to fetch/i.test(errorMessage) ||
+        /network/i.test(errorMessage) ||
+        /fetcherror/i.test(errorMessage) ||
+        (error instanceof Error && /fetch/i.test(error.name));
 
       toast({
-        title: isEmailNotConfirmed ? "Email não Verificado!" : "Erro no login",
+        title: isEmailNotConfirmed
+          ? "Email não Verificado!"
+          : isNetworkError
+          ? "Sem conexão com o servidor"
+          : "Erro no login",
         description:
           isEmailNotConfirmed
             ? "Acesse seu e-mail e clique no botão de acesso."
+            : isNetworkError
+            ? "Não foi possível conectar ao servidor. Verifique sua conexão com a internet ou tente novamente em instantes."
             : errorMessage === "Invalid login credentials"
             ? "E-mail ou senha incorretos."
             : "Ocorreu um erro ao tentar fazer login.",
