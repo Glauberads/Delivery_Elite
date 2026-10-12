@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Header } from '@/components/layout/Header';
 import { PDVProductList } from '@/components/pdv/PDVProductList';
@@ -27,7 +27,7 @@ export default function PDV() {
       subscriptionStatus: user?.subscriptionStatus,
     });
 
-  const handleAddToCart = (
+  const handleAddToCart = useCallback((
     product: Product, 
     quantity = 1, 
     selectedAddons?: ProductAddon[], 
@@ -60,15 +60,19 @@ export default function PDV() {
 
       return [...prev, { product, quantity, selectedAddons, notes }];
     });
-  };
+  }, []);
 
-  const handleRemoveFromCart = (productId: string) => {
+  const handleRemoveFromCart = useCallback((productId: string) => {
     setCartItems(prev => prev.filter(item => item.product.id !== productId));
-  };
+  }, []);
 
-  const handleUpdateQuantity = (productId: string, quantity: number) => {
+  const handleClearCart = useCallback(() => {
+    setCartItems([]);
+  }, []);
+
+  const handleUpdateQuantity = useCallback((productId: string, quantity: number) => {
     if (quantity <= 0) {
-      handleRemoveFromCart(productId);
+      setCartItems(prev => prev.filter(item => item.product.id !== productId));
       return;
     }
     setCartItems(prev =>
@@ -76,7 +80,7 @@ export default function PDV() {
         item.product.id === productId ? { ...item, quantity } : item
       )
     );
-  };
+  }, []);
 
   return (
     <div className="flex flex-col h-full">
@@ -103,6 +107,7 @@ export default function PDV() {
               items={cartItems}
               onUpdateQuantity={handleUpdateQuantity}
               onRemove={handleRemoveFromCart}
+              onClearCart={handleClearCart}
             />
           </div>
         </div>

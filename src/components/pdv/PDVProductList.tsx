@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Product } from '@/types';
@@ -19,13 +19,16 @@ interface PDVProductListProps {
   ) => void;
 }
 
-export function PDVProductList({ onAddToCart }: PDVProductListProps) {
+export const PDVProductList = React.memo(function PDVProductList({ onAddToCart }: PDVProductListProps) {
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('Todos');
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
 
   const { data: products = [], isLoading } = useQuery({
     queryKey: ['products-full'],
+    staleTime: 1000 * 60 * 5, // 5 minutos de cache em memória
+    refetchOnWindowFocus: false,
     queryFn: async () => {
       const { data, error } = await supabase.rpc('get_product_full');
       
@@ -73,12 +76,32 @@ export function PDVProductList({ onAddToCart }: PDVProductListProps) {
     },
   });
 
-  const filteredProducts = products.filter(product =>
-    product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    product.description?.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const categories = useMemo(() => {
+    const set = new Set<string>();
+    products.forEach((p) => {
+      if (p.category) {
+        set.add(p.category);
+      }
+    });
+    return ['Todos', ...Array.from(set)];
+  }, [products]);
 
-  const shouldOpenProductDialog = (product: Product) => {
+  const filteredProducts = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase();
+    return products.filter((product) => {
+      const matchesCategory =
+        selectedCategory === 'Todos' || product.category === selectedCategory;
+      if (!matchesCategory) return false;
+
+      if (!query) return true;
+      return (
+        product.name.toLowerCase().includes(query) ||
+        product.description?.toLowerCase().includes(query)
+      );
+    });
+  }, [products, searchQuery, selectedCategory]);
+
+  const shouldOpenProductDialog = useCallback((product: Product) => {
     const p = product as any;
     const hasVariations = Boolean(p.hasVariations ?? p.has_variations);
     const groups = Array.isArray(p.groups) ? p.groups : [];
@@ -87,13 +110,27 @@ export function PDVProductList({ onAddToCart }: PDVProductListProps) {
       (group: any) => group?.behavior_type === "fractional" || group?.behavior_type === "flavor_mix"
     );
     return hasVariations || hasGroups || hasFractionalGroup;
-  };
+  }, []);
+
+  const handleProductClick = useCallback((product: Product) => {
+    if (shouldOpenProductDialog(product)) {
+      setSelectedProduct(product);
+      setDialogOpen(true);
+    } else {
+      onAddToCart(product);
+    }
+  }, [onAddToCart, shouldOpenProductDialog]);
 
   if (isLoading) {
     return (
       <div className="space-y-4">
         <div className="relative">
           <Skeleton className="h-10 w-full" />
+        </div>
+        <div className="flex gap-2">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <Skeleton key={i} className="h-8 w-20 rounded-full" />
+          ))}
         </div>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {Array.from({ length: 8 }).map((_, index) => (
@@ -103,15 +140,6 @@ export function PDVProductList({ onAddToCart }: PDVProductListProps) {
       </div>
     );
   }
-
-  const handleProductClick = (product: Product) => {
-    if (shouldOpenProductDialog(product)) {
-      setSelectedProduct(product);
-      setDialogOpen(true);
-    } else {
-      onAddToCart(product);
-    }
-  };
 
   return (
     <div className="space-y-4">
@@ -126,18 +154,40 @@ export function PDVProductList({ onAddToCart }: PDVProductListProps) {
         />
       </div>
 
+      {/* Barra de Filtro de Categorias (reduz DOM e acelera localização) */}
+      {categories.length > 1 && (
+        <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
+          {categories.map((category) => (
+            <button
+              key={category}
+              type="button"
+              onClick={() => setSelectedCategory(category)}
+              className={`whitespace-nowrap px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all ${
+                selectedCategory === category
+                  ? "bg-primary text-primary-foreground shadow-sm"
+                  : "bg-muted/80 text-muted-foreground hover:bg-muted hover:text-foreground border border-border/50"
+              }`}
+            >
+              {category}
+            </button>
+          ))}
+        </div>
+      )}
+
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
         {filteredProducts.length > 0 ? (
           filteredProducts.map((product) => (
             <Card
               key={product.id}
-              className="overflow-hidden cursor-pointer group"
+              className="overflow-hidden cursor-pointer group hover:border-primary/50 transition-colors"
               onClick={() => handleProductClick(product)}
             >
               <div className="aspect-square relative overflow-hidden bg-muted">
                 <img
                   src={product.imageUrl || '/placeholder.svg'}
                   alt={product.name}
+                  loading="lazy"
+                  decoding="async"
                   className="object-cover w-full h-full transition-transform group-hover:scale-105"
                 />
               </div>
@@ -173,7 +223,7 @@ export function PDVProductList({ onAddToCart }: PDVProductListProps) {
       />
     </div>
   );
-}
+});
 
 
 

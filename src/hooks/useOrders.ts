@@ -292,6 +292,8 @@ export function usePaymentMethods() {
   return useQuery({
     queryKey: ["paymentMethods", user?.tenantId],
     enabled: !!user?.tenantId,
+    staleTime: 1000 * 60 * 10, // 10 minutos de cache
+    refetchOnWindowFocus: false,
     queryFn: async () => {
       let query = supabase
         .from("payment_methods")

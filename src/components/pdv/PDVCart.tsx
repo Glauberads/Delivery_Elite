@@ -37,9 +37,10 @@ interface PDVCartProps {
   }[];
   onUpdateQuantity: (productId: string, quantity: number) => void;
   onRemove: (productId: string) => void;
+  onClearCart?: () => void;
 }
 
-export function PDVCart({ items, onUpdateQuantity, onRemove }: PDVCartProps) {
+export function PDVCart({ items, onUpdateQuantity, onRemove, onClearCart }: PDVCartProps) {
   const { toast } = useToast();
   const { user } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -56,23 +57,25 @@ export function PDVCart({ items, onUpdateQuantity, onRemove }: PDVCartProps) {
     }
   }, [paymentMethods, paymentMethodId]);
 
-  const subtotal = items.reduce((sum, item) => {
-    let itemTotal = item.product.price * item.quantity;
-    if (item.selectedAddons) {
-      itemTotal +=
-        item.selectedAddons.reduce(
-          (addonSum, addon) => {
-            const behavior = String(addon.groupBehavior ?? "").toLowerCase();
-            if (behavior === "fractional" || behavior === "flavor_mix") {
-              return addonSum;
-            }
-            return addonSum + addon.price * (addon.quantity || 1);
-          },
-          0
-        ) * item.quantity;
-    }
-    return sum + itemTotal;
-  }, 0);
+  const subtotal = React.useMemo(() => {
+    return items.reduce((sum, item) => {
+      let itemTotal = item.product.price * item.quantity;
+      if (item.selectedAddons) {
+        itemTotal +=
+          item.selectedAddons.reduce(
+            (addonSum, addon) => {
+              const behavior = String(addon.groupBehavior ?? "").toLowerCase();
+              if (behavior === "fractional" || behavior === "flavor_mix") {
+                return addonSum;
+              }
+              return addonSum + addon.price * (addon.quantity || 1);
+            },
+            0
+          ) * item.quantity;
+      }
+      return sum + itemTotal;
+    }, 0);
+  }, [items]);
 
   const taxAmount = (subtotal * taxPercentage) / 100;
   const totalAfterTax = subtotal + taxAmount;
@@ -163,35 +166,38 @@ export function PDVCart({ items, onUpdateQuantity, onRemove }: PDVCartProps) {
 
       if (itemsError) throw itemsError;
 
-      // Processar adicionais para cada item
-      if (insertedItems) {
+      // Processar todos os adicionais em um ÚNICO batch insert (reduz de N requisições para apenas 1)
+      if (insertedItems && insertedItems.length > 0) {
+        const allAddonsToInsert = [];
         for (let i = 0; i < items.length; i++) {
           const item = items[i];
           const insertedItem = insertedItems[i];
 
-          // Se o item tem adicionais, inserir na tabela order_item_addons
           if (
             item.selectedAddons &&
             item.selectedAddons.length > 0 &&
             insertedItem
           ) {
-            const addonsToInsert = item.selectedAddons.map((addon) => ({
-              tenant_id: user.tenantId,
-              order_item_id: insertedItem.id,
-              addon_id: addon.id,
-              quantity: addon.quantity || 1,
-              unit_price: addon.price,
-              total_price: addon.price * (addon.quantity || 1),
-            }));
-
-            const { error: addonsError } = await supabase
-              .from("order_item_addons")
-              .insert(addonsToInsert);
-
-            if (addonsError) {
-              console.error("Erro ao inserir adicionais:", addonsError);
-              // Continuar mesmo com erro nos adicionais
+            for (const addon of item.selectedAddons) {
+              allAddonsToInsert.push({
+                tenant_id: user.tenantId,
+                order_item_id: insertedItem.id,
+                addon_id: addon.id,
+                quantity: addon.quantity || 1,
+                unit_price: addon.price,
+                total_price: addon.price * (addon.quantity || 1),
+              });
             }
+          }
+        }
+
+        if (allAddonsToInsert.length > 0) {
+          const { error: addonsError } = await supabase
+            .from("order_item_addons")
+            .insert(allAddonsToInsert);
+
+          if (addonsError) {
+            console.error("Erro ao inserir adicionais:", addonsError);
           }
         }
       }
@@ -201,8 +207,13 @@ export function PDVCart({ items, onUpdateQuantity, onRemove }: PDVCartProps) {
         description: `Pedido #${order.number} criado com sucesso!`,
       });
 
-      // Clear cart
-      items.forEach((item) => onRemove(item.product.id));
+      // Clear cart com apenas uma re-renderização
+      if (onClearCart) {
+        onClearCart();
+      } else {
+        items.forEach((item) => onRemove(item.product.id));
+      }
+
       // Resetar outros valores
       setTaxPercentage(0);
       setDiscountValue(0);
