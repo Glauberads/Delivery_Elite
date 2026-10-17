@@ -60,18 +60,7 @@ export const PDVProductList = React.memo(function PDVProductList({ onAddToCart }
         extrasGroupId: product.extras_group_id,
         sidesGroupId: product.sides_group_id,
         variations: parseJsonArray(product.variations),
-        groups: parseJsonArray(product.groups),
-        addons: parseJsonArray(product.groups)
-          .flatMap((g: any) => (g.items || []).map((item: any) => ({
-            id: item.id,
-            name: item.name,
-            price: item.price,
-            groupId: g.id,
-            groupName: g.name,
-            groupBehavior: g.behavior_type,
-            minOptions: g.min_options,
-            maxOptions: g.max_options
-          })))
+groups: parseJsonArray(product.groups),
       } as Product));
     },
   });

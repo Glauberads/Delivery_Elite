@@ -9,6 +9,14 @@ import { useAuth } from '@/contexts/AuthContext';
 import { shouldBlockTenantAccess } from '@/lib/trial';
 import { Button } from '@/components/ui/button';
 
+function generateCartItemKey(productId: string, notes: string | undefined, selectedAddons: ProductAddon[] | undefined): string {
+  const addonIds = (selectedAddons || [])
+    .map(a => a.id)
+    .filter((id): id is string => id !== undefined)
+    .sort();
+  return `${productId}|${(notes || '').toLowerCase()}|${addonIds.join(',')}`;
+}
+
 export default function PDV() {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -34,25 +42,16 @@ export default function PDV() {
     notes?: string
   ) => {
     setCartItems(prev => {
-      const existingItemIndex = prev.findIndex(item => {
-        if (item.product.id !== product.id) return false;
-        if (item.notes !== notes) return false;
-        if ((!item.selectedAddons && selectedAddons) || 
-            (item.selectedAddons && !selectedAddons)) return false;
-        if (!item.selectedAddons && !selectedAddons) return true;
-        if (item.selectedAddons && selectedAddons) {
-          if (item.selectedAddons.length !== selectedAddons.length) return false;
-          return item.selectedAddons.every(itemAddon => {
-            const matchingAddon = selectedAddons.find(a => a.id === itemAddon.id);
-            return matchingAddon && matchingAddon.quantity === itemAddon.quantity;
-          });
-        }
-        return false;
-      });
+      const newKey = generateCartItemKey(product.id, notes, selectedAddons);
+      const existingIndex = prev.findIndex(item => generateCartItemKey(
+        item.product.id, 
+        item.notes, 
+        item.selectedAddons
+      ) === newKey);
 
-      if (existingItemIndex >= 0) {
+      if (existingIndex >= 0) {
         return prev.map((item, index) => 
-          index === existingItemIndex
+          index === existingIndex
             ? { ...item, quantity: item.quantity + quantity }
             : item
         );
@@ -61,6 +60,60 @@ export default function PDV() {
       return [...prev, { product, quantity, selectedAddons, notes }];
     });
   }, []);
+
+  const handleRemoveFromCart = useCallback((productId: string) => {
+    setCartItems(prev => prev.filter(item => item.product.id !== productId));
+  }, []);
+
+  const handleClearCart = useCallback(() => {
+    setCartItems([]);
+  }, []);
+
+  const handleUpdateQuantity = useCallback((productId: string, quantity: number) => {
+    if (quantity <= 0) {
+      setCartItems(prev => prev.filter(item => item.product.id !== productId));
+      return;
+    }
+    setCartItems(prev =>
+      prev.map(item =>
+        item.product.id === productId ? { ...item, quantity } : item
+      )
+    );
+  }, []);
+
+  return (
+    <div className="flex flex-col h-full">
+      <Header title="PDV - Ponto de Venda" />
+      {accessBlocked ? (
+        <div className="flex flex-1 items-center justify-center p-6">
+          <div className="max-w-lg rounded-xl border bg-card p-6 text-center shadow-sm">
+            <h2 className="text-xl font-semibold">PDV temporariamente bloqueado</h2>
+            <p className="mt-3 text-sm text-muted-foreground">
+              Seu acesso foi bloqueado por assinatura. Regularize o pagamento para continuar vendendo.
+            </p>
+            <Button className="mt-5" onClick={() => navigate("/admin/profile?billing=renew")}>
+              Ir para o checkout
+            </Button>
+          </div>
+        </div>
+      ) : (
+        <div className="flex flex-1 flex-col gap-4 overflow-hidden p-4 lg:grid lg:grid-cols-[3fr_2fr]">
+          <div className="overflow-auto">
+            <PDVProductList onAddToCart={handleAddToCart} />
+          </div>
+          <div className="overflow-auto lg:min-w-0">
+            <PDVCart
+              items={cartItems}
+              onUpdateQuantity={handleUpdateQuantity}
+              onRemove={handleRemoveFromCart}
+              onClearCart={handleClearCart}
+            />
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
 
   const handleRemoveFromCart = useCallback((productId: string) => {
     setCartItems(prev => prev.filter(item => item.product.id !== productId));
